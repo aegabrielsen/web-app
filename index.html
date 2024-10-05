@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/index.css' %}">
+    <script src="{% static 'js/index.js' %}"></script>
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+</head>
+<body onload="init()" style="background:url({% static 'images/background.jpg' %})">
+    <div id="menu-button">menu
+    </div>
+    <div id="menu">
+        <ul>
+            <li>menu1</li>
+            <li>menu2</li>
+            <li>menu3</li>
+            <li>menu4</li>
+        </ul>
+    </div>
+    <div id="header" >header</div>
+    <div id="content" >
+        <div id="login-register-container">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <div class="buttons">
+                <button type="submit">login</button>
+                <button type="button">register</button>
+            </div>
+            
+        </div>
+    </div>
+    <div id="footer">footer</div>
+</body>
+</html>
