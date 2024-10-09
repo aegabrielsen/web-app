@@ -20,14 +20,26 @@
     </div>
     <div id="header" >header</div>
     <div id="content" >
-        <div id="login-register-container">
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="password" name="password" placeholder="Password" required>
+        <!--Form to login-->
+        <div id="login-container" class="login-register-container">
+            <div class="login-register-header">Login</div>
+            <input type="text" name="login_username" placeholder="Username" required>
+            <input type="password" name="login_password" placeholder="Password" required>
             <div class="buttons">
-                <button type="submit">login</button>
-                <button type="button">register</button>
+                <button type="submit">Login</button>
             </div>
             
+        </div>
+        <!--Form to register-->
+        <div id="register-container" class="login-register-container">
+            <div class="login-register-header">Register</div>
+            <input type="text" name="register_username" placeholder="Username" required>
+            <input type="password" name="register_password" placeholder="Password" required>
+            <input type="password" name="register_retype_password" placeholder="Retype Password" required>
+            <div class="buttons">
+                    <button type="button">Register</button>
+            </div>
+
         </div>
     </div>
     <div id="footer">footer</div>
