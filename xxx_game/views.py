@@ -5,6 +5,7 @@ import project1.settings as settings
 from django.http import FileResponse
 import html #HTML ESCAPE
 from pymongo import MongoClient
+import bcrypt
 mongo_client = MongoClient("mongo")
 db = mongo_client["webapp"]
 user_collection = db["users"]
@@ -33,6 +34,25 @@ def login(request):
 
 # This gets the registration form request
 def register(request):
-    print(request)
+
+    # Get form fields
+    username = request.POST.get("username", None)
     password = request.POST.get("password", None)
-    return HttpResponse(password)
+    retype_password = request.POST.get("retype_password", None)
+    
+    # If the passwords do not match, do nothing
+    if password != retype_password:
+        return render(request,"xxx_game/index.html")
+
+    # If the user is already registered, do nothing
+    if user_collection.count_documents({"username" : username}) != 0:
+        return render(request,"xxx_game/index.html")
+
+    salt = bcrypt.gensalt()
+    hash = bcrypt.hashpw(password.encode(), salt)
+
+    user = {"username" : username, "salt" : salt, "hash" : hash}
+
+    user_collection.insert_one(user)
+
+    return render(request,"xxx_game/index.html")
