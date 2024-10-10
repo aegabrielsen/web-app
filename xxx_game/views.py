@@ -42,7 +42,7 @@ def login(request):
 
     # If the password, salted and hashed, matches the hashed password in the DB, do something...
     if bcrypt.hashpw(password.encode(), user["salt"]) == user["hash"]:
-        pass
+        return render(request,"xxx_game/index.html", {"username" : username})
 
     return render(request,"xxx_game/index.html")
 
