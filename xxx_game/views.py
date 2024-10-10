@@ -29,8 +29,22 @@ def custom_static_view(request, path):
 
 # This gets the login form request
 def login(request):
+
+    # Get form fields
+    username = request.POST.get("username", None)
     password = request.POST.get("password", None)
-    return HttpResponse(password)
+
+    # If the user does not exist or there are duplicates, do nothing
+    if user_collection.count_documents({"username" : username}) != 1:
+        return render(request,"xxx_game/index.html")
+    
+    user = user_collection.find_one({"username" : username})
+
+    # If the password, salted and hashed, matches the hashed password in the DB, do something...
+    if bcrypt.hashpw(password.encode(), user["salt"]) == user["hash"]:
+        pass
+
+    return render(request,"xxx_game/index.html")
 
 # This gets the registration form request
 def register(request):
