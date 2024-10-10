@@ -6,13 +6,29 @@ from django.http import FileResponse
 import html #HTML ESCAPE
 from pymongo import MongoClient
 import bcrypt
+import uuid
 mongo_client = MongoClient("mongo")
 db = mongo_client["webapp"]
 user_collection = db["users"]
+global_salt = b'$2b$12$ldSsU24BK6EPANRbUpvXRu'
 
 # Create your views here.
 def index(request):
-    return render(request,"xxx_game/index.html")
+    
+    auth_token = request.COOKIES.get("auth_token")
+    if auth_token is None:
+        return render(request,"xxx_game/index.html")
+
+    auth_token = request.COOKIES.get("auth_token").encode()
+    auth_token_hash = bcrypt.hashpw(auth_token, global_salt)
+
+    user = user_collection.find_one({"auth_token_hash" : auth_token_hash})
+
+    if user is None:
+        return render(request,"xxx_game/index.html")
+
+    response = render(request,"xxx_game/index.html", {"username" : user["username"]})
+    return response
 
 def test(request):
     user_collection.insert_one({"username": "new", "message": html.escape("test")})
@@ -40,9 +56,17 @@ def login(request):
     
     user = user_collection.find_one({"username" : username})
 
-    # If the password, salted and hashed, matches the hashed password in the DB, do something...
+    # If the password, salted and hashed, matches the hashed password in the DB, set the auth_token cookie and store its hash in the DB
     if bcrypt.hashpw(password.encode(), user["salt"]) == user["hash"]:
-        return render(request,"xxx_game/index.html", {"username" : username})
+
+        auth_token = uuid.uuid4().bytes
+        auth_token_hash = bcrypt.hashpw(auth_token, global_salt)
+
+        user_collection.update_one({"auth_token_hash" : auth_token_hash}, {"$set" : {"username" : username}})
+
+        response = render(request,"xxx_game/index.html", {"username" : username})
+        response.set_cookie("auth_token", auth_token, max_age=60*60*24, httponly=True)
+        return response
 
     return render(request,"xxx_game/index.html")
 
@@ -64,12 +88,17 @@ def register(request):
 
     salt = bcrypt.gensalt()
     hash = bcrypt.hashpw(password.encode(), salt)
+    
+    auth_token = uuid.uuid4().bytes
+    auth_token_hash = bcrypt.hashpw(auth_token, global_salt)
 
-    user = {"username" : username, "salt" : salt, "hash" : hash}
+    user = {"username" : username, "salt" : salt, "hash" : hash, "auth_token_hash" : auth_token_hash}
 
     user_collection.insert_one(user)
 
-    return render(request,"xxx_game/index.html")
+    response = render(request,"xxx_game/index.html", {"username" : username})
+    response.set_cookie("auth_token", auth_token, max_age=60*60*24, httponly=True) # I THINK THERE IS A PROBLEM HERE BECAUSE THE COOKIE HAS "" AROUND IT IN THE BROWSER
+    return response
 
 # Logout route
 def logout(request):
