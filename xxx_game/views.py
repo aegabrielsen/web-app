@@ -28,9 +28,11 @@ def custom_static_view(request, path):
 
 # This gets the login form request
 def login(request):
-    return HttpResponse(request)
+    password = request.POST.get("password", None)
+    return HttpResponse(password)
 
 # This gets the registration form request
 def register(request):
     print(request)
-    return HttpResponse(request)
+    password = request.POST.get("password", None)
+    return HttpResponse(password)
