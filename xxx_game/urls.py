@@ -6,4 +6,6 @@ from . import views
 urlpatterns = [
     path("", views.index,name = "index"),
     path('static/<path:path>', custom_static_view),
+    path("/login", views.login, name = "login"),
+    path("/register", views.register, name = "register")
 ]

@@ -15,3 +15,12 @@ def custom_static_view(request, path):
     response['Cache-Control'] = 'public, max-age=3600'
     response['X-Content-Type-Options'] = 'nosniff'
     return response
+
+# This gets the login form request
+def login(request):
+    return HttpResponse(request)
+
+# This gets the registration form request
+def register(request):
+    print(request)
+    return HttpResponse(request)
