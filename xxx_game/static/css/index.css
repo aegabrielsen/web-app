@@ -16,6 +16,9 @@
     width: 100%;
     height: 680px;
 }
+h1{
+    color: white;
+}
 .login-register-container{
     /* padding: 10px; */
     /* margin: 10px; */

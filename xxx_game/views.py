@@ -15,7 +15,7 @@ def index(request):
     return render(request,"xxx_game/index.html")
 
 def test(request):
-    user_collection.insert_one({"username": "new", "message": html.escape("test"), "user_browser_id": "test"})
+    user_collection.insert_one({"username": "new", "message": html.escape("test")})
     users = list(user_collection.find())
     return HttpResponse(users)
 
@@ -69,4 +69,17 @@ def register(request):
 
     user_collection.insert_one(user)
 
+    return render(request,"xxx_game/index.html")
+
+# Logout route
+def logout(request):
+    auth_token = request.COOKIES.get('auth_token')
+    # user_collection.insert_one({"username": "asdf", "message": html.escape("qwerty")})
+    # user_collection.update_one({ "username": "new"}, {"$unset": {"message": ""}}) # working update
+    if auth_token is None: # User is not logged in to begin with
+        return render(request,"xxx_game/index.html")
+    # Hash token and check for it in the database
+    auth_token_hash = bcrypt.hashpw(auth_token.encode(), b'')
+    # user_collection.findOneAndUpdate({ auth_token: auth_token_hash}, {"$unset:" "auth_token"}) # Delete auth token field from DB
+    user_collection.update_one({ "auth_token": auth_token_hash}, {"$unset": {"auth_token": ""}}) # Delete auth token field from DB
     return render(request,"xxx_game/index.html")
