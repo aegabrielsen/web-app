@@ -14,7 +14,7 @@ global_salt = b'$2b$12$ldSsU24BK6EPANRbUpvXRu'
 
 def get_db_field_from_auth(request, field):
     # Pass request into this function and it will attempt to retrieve a user from the auth_token cookie.
-    # If no auth_token exists, returns None.
+    # If no auth_token exists or if the search turns up empty, returns None.
     # Pass the field you want to get with field as a string. So for username pass "username"
     auth_token = request.COOKIES.get("auth_token")
     if auth_token is None:
