@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 import os
 import project1.settings as settings
 from django.http import FileResponse
@@ -12,6 +12,7 @@ db = mongo_client["webapp"]
 user_collection = db["users"]
 global_salt = b'$2b$12$ldSsU24BK6EPANRbUpvXRu'
 
+<<<<<<< Updated upstream
 def get_db_field_from_auth(request, field):
     # Pass request into this function and it will attempt to retrieve a user from the auth_token cookie.
     # If no auth_token exists, returns None.
@@ -28,15 +29,17 @@ def get_db_field_from_auth(request, field):
         return None
     return user.get(field)
 
+=======
+>>>>>>> Stashed changes
 # Create your views here.
 def index(request):
     
-    # auth_token = request.COOKIES.get("auth_token")
-    # if auth_token is None:
-    #     return render(request,"xxx_game/index.html")
-    # auth_token = request.COOKIES.get("auth_token")
-    # auth_token_hash = bcrypt.hashpw(auth_token.encode(), global_salt)
-    # user = user_collection.find_one({"auth_token_hash" : auth_token_hash})
+    auth_token = request.COOKIES.get("auth_token")
+    if auth_token is None:
+        return render(request,"xxx_game/index.html")
+    auth_token = request.COOKIES.get("auth_token")
+    auth_token_hash = bcrypt.hashpw(auth_token.encode(), global_salt)
+    user = user_collection.find_one({"auth_token_hash" : auth_token_hash})
     # Above code is working but replaced with a function for cleaner code. Revert to this if function doesn't work
     
     # test_user = user_collection.find_one({"username" : "testuser"})
@@ -83,7 +86,8 @@ def login(request):
         # Find user and set a new auth token
         user_collection.update_one({"username" : username}, {"$set" : {"auth_token_hash" : auth_token_hash}})
 
-        response = render(request,"xxx_game/index.html", {"username" : username})
+        # response = render(request,"xxx_game/index.html", {"username" : username})
+        response = redirect("/", {"username" : username})
         response.set_cookie("auth_token", auth_token, max_age=60*60*24, httponly=True)
         return response
 
@@ -115,7 +119,8 @@ def register(request):
 
     user_collection.insert_one(user)
 
-    response = render(request,"xxx_game/index.html", {"username" : username})
+    # response = render(request,"xxx_game/index.html", {"username" : username})
+    response = redirect("/", {"username" : username})
     response.set_cookie("auth_token", auth_token, max_age=60*60*24, httponly=True)
     return response
 
@@ -127,4 +132,4 @@ def logout(request):
     # Hash token and check for it in the database
     auth_token_hash = bcrypt.hashpw(auth_token.encode(), global_salt) # Hash the unhashed cookie auth token so we can check for it in the DB
     user_collection.update_one({ "auth_token_hash": auth_token_hash}, {"$unset": {"auth_token_hash": ""}}) # Delete auth token field from DB
-    return render(request,"xxx_game/index.html")
+    return redirect("/")
