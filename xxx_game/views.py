@@ -24,13 +24,13 @@ def index(request):
 
     user = user_collection.find_one({"auth_token_hash" : auth_token_hash})
     
-    test_user = user_collection.find_one({"username" : "testuser"})
-    return HttpResponse(f"{test_user} <--- user \n {user["username"]} <--- db username \n {auth_token_hash} <--- the hashed auth token on the server")
+    # test_user = user_collection.find_one({"username" : "testuser"})
+    # return HttpResponse(f"{test_user} <--- user \n {user.get('username')} <--- db username \n {auth_token_hash} <--- the hashed auth token on the server")
 
     if user is None:
         return render(request,"xxx_game/index.html")
 
-    response = render(request,"xxx_game/index.html", {"username" : user["username"]})
+    response = render(request,"xxx_game/index.html", {"username" : user.get('username')})
     return response
 
 def test(request):
@@ -111,7 +111,7 @@ def logout(request):
     if auth_token is None: # User is not logged in to begin with
         return render(request,"xxx_game/index.html")
     # Hash token and check for it in the database
-    auth_token_hash = bcrypt.hashpw(auth_token.encode(), b'')
+    auth_token_hash = bcrypt.hashpw(auth_token.encode(), global_salt)
     # user_collection.findOneAndUpdate({ auth_token: auth_token_hash}, {"$unset:" "auth_token"}) # Delete auth token field from DB
     user_collection.update_one({ "auth_token": auth_token_hash}, {"$unset": {"auth_token": ""}}) # Delete auth token field from DB
     return render(request,"xxx_game/index.html")
