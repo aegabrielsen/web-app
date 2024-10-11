@@ -31,12 +31,12 @@ def get_db_field_from_auth(request, field):
 # Create your views here.
 def index(request):
     
-    auth_token = request.COOKIES.get("auth_token")
-    if auth_token is None:
-        return render(request,"xxx_game/index.html")
-    auth_token = request.COOKIES.get("auth_token")
-    auth_token_hash = bcrypt.hashpw(auth_token.encode(), global_salt)
-    user = user_collection.find_one({"auth_token_hash" : auth_token_hash})
+    # auth_token = request.COOKIES.get("auth_token")
+    # if auth_token is None:
+    #     return render(request,"xxx_game/index.html")
+    # auth_token = request.COOKIES.get("auth_token")
+    # auth_token_hash = bcrypt.hashpw(auth_token.encode(), global_salt)
+    # user = user_collection.find_one({"auth_token_hash" : auth_token_hash})
     # Above code is working but replaced with a function for cleaner code. Revert to this if function doesn't work
     
     # test_user = user_collection.find_one({"username" : "testuser"})
