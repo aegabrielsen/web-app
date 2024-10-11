@@ -15,7 +15,7 @@ global_salt = b'$2b$12$ldSsU24BK6EPANRbUpvXRu'
 def get_db_field_from_auth(request, field):
     # Pass request into this function and it will attempt to retrieve a user from the auth_token cookie.
     # If no auth_token exists, returns None.
-    # Pass the field you want to get with field
+    # Pass the field you want to get with field as a string. So for username pass "username"
     auth_token = request.COOKIES.get("auth_token")
     if auth_token is None:
         return None
@@ -24,6 +24,9 @@ def get_db_field_from_auth(request, field):
     auth_token_hash = bcrypt.hashpw(auth_token.encode(), global_salt)
 
     user = user_collection.find_one({"auth_token_hash" : auth_token_hash})
+    if user is None:
+        return None
+    return user.get(field)
 
 # Create your views here.
 def index(request):
@@ -39,10 +42,10 @@ def index(request):
     # test_user = user_collection.find_one({"username" : "testuser"})
     # return HttpResponse(f"{test_user} <--- user \n {user.get('username')} <--- db username \n {auth_token_hash} <--- the hashed auth token on the server")
 
-    if user is None:
+    if get_db_field_from_auth(request, "username") is None:
         return render(request,"xxx_game/index.html")
 
-    response = render(request,"xxx_game/index.html", {"username" : user.get('username')})
+    response = render(request,"xxx_game/index.html", {"username" : get_db_field_from_auth(request, "username")})
     return response
 
 def test(request):
