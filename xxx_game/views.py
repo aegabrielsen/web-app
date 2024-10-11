@@ -19,10 +19,13 @@ def index(request):
     if auth_token is None:
         return render(request,"xxx_game/index.html")
 
-    auth_token = request.COOKIES.get("auth_token").encode()
-    auth_token_hash = bcrypt.hashpw(auth_token, global_salt)
+    auth_token = request.COOKIES.get("auth_token")
+    auth_token_hash = bcrypt.hashpw(auth_token.encode(), global_salt)
 
     user = user_collection.find_one({"auth_token_hash" : auth_token_hash})
+    
+    test_user = user_collection.find_one({"username" : "testuser"})
+    return HttpResponse(f"{test_user} <--- user \n {user["username"]} <--- db username \n {auth_token_hash} <--- the hashed auth token on the server")
 
     if user is None:
         return render(request,"xxx_game/index.html")
@@ -59,8 +62,8 @@ def login(request):
     # If the password, salted and hashed, matches the hashed password in the DB, set the auth_token cookie and store its hash in the DB
     if bcrypt.hashpw(password.encode(), user["salt"]) == user["hash"]:
 
-        auth_token = uuid.uuid4().bytes
-        auth_token_hash = bcrypt.hashpw(auth_token, global_salt)
+        auth_token = str(uuid.uuid4())
+        auth_token_hash = bcrypt.hashpw(auth_token.encode(), global_salt)
 
         user_collection.update_one({"auth_token_hash" : auth_token_hash}, {"$set" : {"username" : username}})
 
@@ -89,8 +92,8 @@ def register(request):
     salt = bcrypt.gensalt()
     hash = bcrypt.hashpw(password.encode(), salt)
     
-    auth_token = uuid.uuid4().bytes
-    auth_token_hash = bcrypt.hashpw(auth_token, global_salt)
+    auth_token = str(uuid.uuid4())
+    auth_token_hash = bcrypt.hashpw(auth_token.encode(), global_salt)
 
     user = {"username" : username, "salt" : salt, "hash" : hash, "auth_token_hash" : auth_token_hash}
 
