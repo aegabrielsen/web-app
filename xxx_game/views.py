@@ -12,7 +12,6 @@ db = mongo_client["webapp"]
 user_collection = db["users"]
 global_salt = b'$2b$12$ldSsU24BK6EPANRbUpvXRu'
 
-<<<<<<< Updated upstream
 def get_db_field_from_auth(request, field):
     # Pass request into this function and it will attempt to retrieve a user from the auth_token cookie.
     # If no auth_token exists, returns None.
@@ -29,8 +28,6 @@ def get_db_field_from_auth(request, field):
         return None
     return user.get(field)
 
-=======
->>>>>>> Stashed changes
 # Create your views here.
 def index(request):
     
@@ -112,16 +109,16 @@ def register(request):
     salt = bcrypt.gensalt()
     hash = bcrypt.hashpw(password.encode(), salt)
     
-    auth_token = str(uuid.uuid4())
-    auth_token_hash = bcrypt.hashpw(auth_token.encode(), global_salt)
+    # auth_token = str(uuid.uuid4())
+    # auth_token_hash = bcrypt.hashpw(auth_token.encode(), global_salt)
 
-    user = {"username" : username, "salt" : salt, "hash" : hash, "auth_token_hash" : auth_token_hash}
+    user = {"username" : username, "salt" : salt, "hash" : hash}
 
     user_collection.insert_one(user)
 
     # response = render(request,"xxx_game/index.html", {"username" : username})
     response = redirect("/", {"username" : username})
-    response.set_cookie("auth_token", auth_token, max_age=60*60*24, httponly=True)
+    # response.set_cookie("auth_token", auth_token, max_age=60*60*24, httponly=True)
     return response
 
 # Logout route
