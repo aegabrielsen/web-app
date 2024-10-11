@@ -30,28 +30,11 @@ def get_db_field_from_auth(request, field):
 
 # Create your views here.
 def index(request):
-    
-    # auth_token = request.COOKIES.get("auth_token")
-    # if auth_token is None:
-    #     return render(request,"xxx_game/index.html")
-    # auth_token = request.COOKIES.get("auth_token")
-    # auth_token_hash = bcrypt.hashpw(auth_token.encode(), global_salt)
-    # user = user_collection.find_one({"auth_token_hash" : auth_token_hash})
-    # Above code is working but replaced with a function for cleaner code. Revert to this if function doesn't work
-    
-    # test_user = user_collection.find_one({"username" : "testuser"})
-    # return HttpResponse(f"{test_user} <--- user \n {user.get('username')} <--- db username \n {auth_token_hash} <--- the hashed auth token on the server")
-
     if get_db_field_from_auth(request, "username") is None:
         return render(request,"xxx_game/index.html")
 
     response = render(request,"xxx_game/index.html", {"username" : get_db_field_from_auth(request, "username")})
     return response
-
-def test(request):
-    user_collection.insert_one({"username": "new", "message": html.escape("test")})
-    users = list(user_collection.find())
-    return HttpResponse(users)
 
 # The middleware is skipped when using django.contrib.staticfiles, so here we do not use django.contrib.staticfiles, but customize the static file processing to set X-Content-Type-Options: nosniff.
 def custom_static_view(request, path):
@@ -83,7 +66,6 @@ def login(request):
         # Find user and set a new auth token
         user_collection.update_one({"username" : username}, {"$set" : {"auth_token_hash" : auth_token_hash}})
 
-        # response = render(request,"xxx_game/index.html", {"username" : username})
         response = redirect("/", {"username" : username})
         response.set_cookie("auth_token", auth_token, max_age=60*60*24, httponly=True)
         return response
@@ -109,16 +91,11 @@ def register(request):
     salt = bcrypt.gensalt()
     hash = bcrypt.hashpw(password.encode(), salt)
     
-    # auth_token = str(uuid.uuid4())
-    # auth_token_hash = bcrypt.hashpw(auth_token.encode(), global_salt)
-
     user = {"username" : username, "salt" : salt, "hash" : hash}
 
     user_collection.insert_one(user)
 
-    # response = render(request,"xxx_game/index.html", {"username" : username})
     response = redirect("/", {"username" : username})
-    # response.set_cookie("auth_token", auth_token, max_age=60*60*24, httponly=True)
     return response
 
 # Logout route
