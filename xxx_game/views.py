@@ -12,10 +12,13 @@ db = mongo_client["webapp"]
 user_collection = db["users"]
 global_salt = b'$2b$12$ldSsU24BK6EPANRbUpvXRu'
 
-def get_db_field_from_auth(request, field):
+def get_user_from_auth(request):
     # Pass request into this function and it will attempt to retrieve a user from the auth_token cookie.
     # If no auth_token exists or if the search turns up empty, returns None.
-    # Pass the field you want to get with field as a string. So for username pass "username"
+    # Can be used anywhere like this: user = get_user_from_auth(request).
+    # Can then get fields from it like this: user.get('username')
+    # Make sure to do a None check in case either the user isn't logged in or the auth token isn't in the database.
+    # Check the index function to see an example of how to use this.
     auth_token = request.COOKIES.get("auth_token")
     if auth_token is None:
         return None
@@ -26,14 +29,15 @@ def get_db_field_from_auth(request, field):
     user = user_collection.find_one({"auth_token_hash" : auth_token_hash})
     if user is None:
         return None
-    return user.get(field)
+    return user
 
 # Create your views here.
 def index(request):
-    if get_db_field_from_auth(request, "username") is None:
+    user = get_user_from_auth(request)
+    if user is None:
         return render(request,"xxx_game/index.html")
 
-    response = render(request,"xxx_game/index.html", {"username" : get_db_field_from_auth(request, "username")})
+    response = render(request,"xxx_game/index.html", {"username" : user.get('username')})
     return response
 
 # The middleware is skipped when using django.contrib.staticfiles, so here we do not use django.contrib.staticfiles, but customize the static file processing to set X-Content-Type-Options: nosniff.
