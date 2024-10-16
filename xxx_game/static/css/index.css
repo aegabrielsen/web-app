@@ -86,3 +86,24 @@ h1{
     top: 20px;
     right: 10px;
 }
+#chat-window{
+    border: 1px solid #ccc;
+    width: 80% ; 
+    height: 300px;
+    margin: 20 px auto;
+    background-color: white;
+    padding: 10px;
+    color: black;
+
+
+}
+#chat-message { 
+    width: 80%;
+    height: 100px;
+    background-color: white;
+    padding: 10px;
+    font-size: 10px;
+    align-items: center;
+    
+}
+

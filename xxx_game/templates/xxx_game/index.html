@@ -21,7 +21,7 @@
     <div id="header" ></div>
     <div id="content" >
         
-        <h1>{{username}}</h1>
+        <h1>Welcome, {{username}}</h1>
 
         <!-- Form to login -->
         <form action="/login" method="post" id="login-container" class="login-register-container">
@@ -55,7 +55,18 @@
                 <button type="submit">Logout</button>
             </div>
 
-        </form>
+        <div class = "chat"> Chat</div>
+            <form id="chat-form" method = "post" action = "/send-message">
+                {% csrf_token %}
+                <textarea name="message" id = "chat-message" placeholder="Enter Message" required></textarea>
+                <div class="buttons">
+                <button type = "submit">Send</button>
+            </div>
+            </form>
+
+        
+        <!--Chat-->
+        
         
     </div>
     <div id="footer"></div>

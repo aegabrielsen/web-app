@@ -34,6 +34,7 @@ def get_user_from_auth(request):
 # Create your views here.
 def index(request):
     user = get_user_from_auth(request)
+    posts = list(db['posts'].find().sort('timestamp',-1))
     if user is None:
         return render(request,"xxx_game/index.html")
 
@@ -111,3 +112,23 @@ def logout(request):
     auth_token_hash = bcrypt.hashpw(auth_token.encode(), global_salt) # Hash the unhashed cookie auth token so we can check for it in the DB
     user_collection.update_one({ "auth_token_hash": auth_token_hash}, {"$unset": {"auth_token_hash": ""}}) # Delete auth token field from DB
     return redirect("/")
+
+#createpost
+## function to create post object
+def create_post(request):
+    user = get_user_from_auth(request)
+    if user is None:
+        return
+    content = request.POST.get('content')
+    reaction = request.POST.get('reaction')
+    tag = request.POST.get('tag')
+    post = { 
+        'username': user.get('username'),
+        'content':content,
+        'reaction': reaction,
+        'tag': tag
+    }
+    db['posts'].insert_one(post)
+    return redirect("/")
+
+    
