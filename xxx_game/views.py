@@ -113,7 +113,4 @@ def logout(request):
     return redirect("/")
 
 def chat(request):
-    user = get_user_from_auth(request)
-    if user is None:
-        return redirect('/')
-    return render(request, 'xxx_game/chat.html', {'username': user.get('username')})
+    return render(request, 'xxx_game/chat.html')
