@@ -86,6 +86,7 @@ h1{
     top: 20px;
     right: 10px;
 }
+<<<<<<< HEAD
 #chat-window{
     border: 1px solid #ccc;
     width: 80% ; 
@@ -108,3 +109,12 @@ h1{
 }
 
 
+=======
+
+.chat-button button {
+    width: 20%;
+    height: 30px;
+    margin: 10px;
+    font-size: 20px;
+}
+>>>>>>> 49729ea9264ac4754a88509d32a4078d0cbaf05e

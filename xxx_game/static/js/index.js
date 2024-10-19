@@ -11,3 +11,4 @@ function init(){
         menu_button.style.display = "block";
     };
 }
+
