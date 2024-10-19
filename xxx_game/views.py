@@ -6,7 +6,7 @@ from django.http import FileResponse
 import html #HTML ESCAPE
 from pymongo import MongoClient
 import bcrypt
-import uuid
+import uuid    
 mongo_client = MongoClient("mongo")
 db = mongo_client["webapp"]
 user_collection = db["users"]
@@ -111,3 +111,9 @@ def logout(request):
     auth_token_hash = bcrypt.hashpw(auth_token.encode(), global_salt) # Hash the unhashed cookie auth token so we can check for it in the DB
     user_collection.update_one({ "auth_token_hash": auth_token_hash}, {"$unset": {"auth_token_hash": ""}}) # Delete auth token field from DB
     return redirect("/")
+
+def chat(request):
+    user = get_user_from_auth(request)
+    if user is None:
+        return redirect('/')
+    return render(request, 'xxx_game/chat.html', {'username': user.get('username')})

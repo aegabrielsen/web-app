@@ -8,5 +8,6 @@ urlpatterns = [
     path('static/<path:path>', custom_static_view),
     path("login", views.login, name = "login"),
     path("register", views.register, name = "register"),
-    path("logout", views.logout, name = "logout")
+    path("logout", views.logout, name = "logout"),
+    path("chat", views.chat, name = "chat")
 ]

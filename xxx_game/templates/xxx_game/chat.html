@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Pages</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/chat.css' %}">
+</head>
+<body>
+    <div class="contents">
+        <h1>Home Page</h1>
+        <hr>
+        <div class="chat-container">
+            <hr>
+            <div class="chat-messages">
+
+            </div>
+            <div class="chat-input">
+                <hr>
+                <label> Chat: 
+                    <input id="chatInput" type="text" placeholder="Start typing here...">
+                </label>
+                <button id="chat-hashtag" type="button" onclick="chatHashtag()">#</button>
+                <button id="chat-button" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
