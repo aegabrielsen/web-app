@@ -34,9 +34,16 @@ def get_user_from_auth(request):
 # Create your views here.
 def index(request):
     user = get_user_from_auth(request)
-    posts = list(db['posts'].find().sort('timestamp',-1))
+    posts = list(db['posts'].find())
+
+  
     if user is None:
         return render(request,"xxx_game/index.html")
+    context = { 
+        "username":user.get('username') if user else "Guest",
+        "posts": posts 
+    }
+    
 
     response = render(request,"xxx_game/index.html", {"username" : user.get('username')})
     return response
@@ -47,6 +54,7 @@ def custom_static_view(request, path):
     response = FileResponse(open(file_path, 'rb'))
     response['Cache-Control'] = 'public, max-age=3600'
     response['X-Content-Type-Options'] = 'nosniff'
+   
     return response
 
 # This gets the login form request
@@ -117,18 +125,21 @@ def logout(request):
 ## function to create post object
 def create_post(request):
     user = get_user_from_auth(request)
-    if user is None:
-        return
+    
     content = request.POST.get('content')
-    reaction = request.POST.get('reaction')
-    tag = request.POST.get('tag')
     post = { 
-        'username': user.get('username'),
+        'username': "Guest",
         'content':content,
-        'reaction': reaction,
-        'tag': tag
+       
     }
     db['posts'].insert_one(post)
-    return redirect("/")
+    return redirect ("/chat")
+    
+def chat(request):
+    posts = list(db['posts'].find())
+    context = { 
+        'posts':posts
+    }
+    return render(request, 'xxx_game/chat.html',context)
 
     

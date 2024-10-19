@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Pages</title>
+    <link rel="stylesheet" type="text/css" href="../static/chat.css">
+</head>
+<body>
+    <div class="contents">
+        <h1>Home Page</h1>
+        <hr>
+        <div class="chat-container">
+            <hr>
+            <div class="chat-messages">
+
+            </div>
+            <div class="chat-input">
+                <hr>
+                <form action="/create_post" method="post" id= "chat-form">
+                {% csrf_token %}
+                <label> Chat: 
+                    <input id="chatInput" type="text" placeholder="Start typing here..." required>
+                </label>
+                <button type="submit" id="chat-button" >Send</button>
+            </div>
+        </form>
+
+        <!--Display Posts-->
+        <h2> Messages</h2>
+        {% for post in posts %}
+        <div class="post">
+            <p>User:{{post.username}}</p>
+            <p>{{post.content}}</p>
+        </div>
+        {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

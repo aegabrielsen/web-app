@@ -47,6 +47,9 @@
             </div>
 
         </form>
+        <div class="chat-button"></div>
+            <button onclick="window.location.href='chat'">Go to Chat</button>
+        </div>
 
         <!-- Logout form -->
         <form action="/logout" method="post" id="logout-container" class="login-register-container">
@@ -55,15 +58,9 @@
                 <button type="submit">Logout</button>
             </div>
 
-        <div class = "chat"> Chat</div>
-            <form id="chat-form" method = "post" action = "/send-message">
-                {% csrf_token %}
-                <textarea name="message" id = "chat-message" placeholder="Enter Message" required></textarea>
-                <div class="buttons">
-                <button type = "submit">Send</button>
-            </div>
-            </form>
 
+            </form>            
+        </div>
         
         <!--Chat-->
         
