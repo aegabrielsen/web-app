@@ -121,7 +121,6 @@ def logout(request):
     user_collection.update_one({ "auth_token_hash": auth_token_hash}, {"$unset": {"auth_token_hash": ""}}) # Delete auth token field from DB
     return redirect("/")
 
-<<<<<<< HEAD
 #createpost
 ## function to create post object
 def create_post(request):
@@ -144,7 +143,3 @@ def chat(request):
     return render(request, 'xxx_game/chat.html',context)
 
     
-=======
-def chat(request):
-    return render(request, 'xxx_game/chat.html')
->>>>>>> 49729ea9264ac4754a88509d32a4078d0cbaf05e
