@@ -125,13 +125,14 @@ def logout(request):
 ## function to create post object
 def create_post(request):
     user = get_user_from_auth(request)
-    
-    content = request.POST.get('content')
+    print("POST REQUEST:" + str(request.POST))
+    content = request.POST.get('content')    
     post = { 
         'username': "Guest",
-        'content':content,
+        'content':content
        
     }
+    
     db['posts'].insert_one(post)
     return redirect ("/chat")
     
