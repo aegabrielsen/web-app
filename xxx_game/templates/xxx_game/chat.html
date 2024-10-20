@@ -4,20 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home Pages</title>
-    <link rel="stylesheet" type="text/css" href="../static/chat.css">
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/chat.css' %}">
 </head>
 <body>
     <div class="contents">
         <h1>Home Page</h1>
+        <div class="back-button"></div>
+            <button onclick="window.location.href='login'">Go to Login</button>
+        </div>
         <hr>
         <div class="chat-container">
-            <hr>
-            <div class="chat-messages">
-
-            </div>
             <div class="chat-input">
-                <hr>
-<<<<<<< HEAD
                 <form action="/create_post" method="post" id= "chat-form">
                 {% csrf_token %}
                 <label> Chat: 
@@ -25,24 +23,16 @@
                 </label>
                 <button type="submit" id="chat-button" >Send</button>
             </div>
-        </form>
 
-        <!--Display Posts-->
-        <h2> Messages</h2>
-        {% for post in posts %}
-        <div class="post">
-            <p>User:{{post.username}}</p>
-            <p>{{post.content}}</p>
-        </div>
-        {% endfor %}
-=======
-                <label> Chat: 
-                    <input id="chatInput" type="text" placeholder="Start typing here...">
-                </label>
-                <button id="chat-hashtag" type="button" onclick="chatHashtag()">#</button>
-                <button id="chat-button" onclick="sendMessage()">Send</button>
+            <!--Display Posts-->
+            <h2> Messages</h2>
+            {% for post in posts %}
+            <div class="post">
+                <p>User:{{post.username}}</p>
+                <p>{{post.content}}</p>
             </div>
->>>>>>> 49729ea9264ac4754a88509d32a4078d0cbaf05e
+            {% endfor %}
+            <hr>
         </div>
     </div>
 </body>
