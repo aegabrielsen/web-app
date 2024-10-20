@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home Pages</title>
-    <link rel="stylesheet" type="text/css" href="../static/chat.css">
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/chat.css' %}">
 </head>
 <body>
     <div class="contents">
         <h1>Home Page</h1>
+        <div class="back-button"></div>
+            <button onclick="window.location.href='login'">Go to Login</button>
+        </div>
         <hr>
         <div class="chat-container">
-            <hr>
-            <div class="chat-messages">
-
-            </div>
             <div class="chat-input">
                 <hr>
                 <form action="/create_post" method="post" id= "chat-form">

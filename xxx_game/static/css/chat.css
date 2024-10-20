@@ -1,3 +1,15 @@
+.chat-container {
+    border: 2px solid black; 
+    padding: 20px;     
+    margin: 0 auto;          
+    width: 90%;             
+    background-color: #fff;  
+    border-radius: 10px;   
+}
+back-button button {
+    align-items: left;
+    align-content: left;
+}
 chat-button button {
     width: 20%;
     height: 30px;
@@ -13,4 +25,15 @@ body h1{
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.post {
+    border: 1px solid black;
+    padding: 20px;
+    margin-bottom: 5px;    
+    border-radius: 5px;     
+    background-color: #f9f9f9;
+    width: 50%;
+    height: 60px; 
+    overflow: hidden;
 }
