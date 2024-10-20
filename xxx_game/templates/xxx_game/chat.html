@@ -17,15 +17,15 @@
             </div>
             <div class="chat-input">
                 <hr>
-<<<<<<< HEAD
                 <form action="/create_post" method="post" id= "chat-form">
                 {% csrf_token %}
                 <label> Chat: 
-                    <input id="chatInput" type="text" placeholder="Start typing here..." required>
+                    <input id="chatInput" name="content" type="text" placeholder="Start typing here..." required>
                 </label>
                 <button type="submit" id="chat-button" >Send</button>
+                </form>
             </div>
-        </form>
+        
 
         <!--Display Posts-->
         <h2> Messages</h2>
@@ -35,14 +35,6 @@
             <p>{{post.content}}</p>
         </div>
         {% endfor %}
-=======
-                <label> Chat: 
-                    <input id="chatInput" type="text" placeholder="Start typing here...">
-                </label>
-                <button id="chat-hashtag" type="button" onclick="chatHashtag()">#</button>
-                <button id="chat-button" onclick="sendMessage()">Send</button>
-            </div>
->>>>>>> 49729ea9264ac4754a88509d32a4078d0cbaf05e
         </div>
     </div>
 </body>
