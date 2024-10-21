@@ -8,6 +8,8 @@ from pymongo import MongoClient
 import bcrypt
 import uuid    
 mongo_client = MongoClient("mongo")
+from bson.objectid import ObjectId
+from django.shortcuts import redirect
 db = mongo_client["webapp"]
 user_collection = db["users"]
 global_salt = b'$2b$12$ldSsU24BK6EPANRbUpvXRu'
@@ -131,13 +133,15 @@ def create_post(request):
     if user:
         post = { 
         'username': user['username'],
-        'content':escaped_content
+        'content':escaped_content,
+        'likes': []
        
      }
     if not user:
         post = { 
         'username': "Guest",
-        'content':escaped_content
+        'content':content,
+        'likes': []
        
      }
     
@@ -146,6 +150,10 @@ def create_post(request):
     
 def chat(request):
     posts = list(db['posts'].find())
+    for post in posts:
+        post['post_id'] = str(post['_id'])
+
+
     context = { 
         'posts':posts
     }
@@ -153,3 +161,20 @@ def chat(request):
 
 def escape_HTML(message):
     return message.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+def like_posts(request,post_id):
+    user = get_user_from_auth(request)
+    if user is None: 
+        return redirect('/')
+    
+    post = db['posts'].find_one({'_id': ObjectId(post_id)})
+    if not post:
+        return redirect("/chat")
+    if user['username'] not in post.get('likes', []):
+        db['posts'].update_one(
+            {'_id': ObjectId(post_id)},
+            {'$push':{'likes': user['username']}}
+        )
+        return redirect ('/chat')
+    
+    
+    
