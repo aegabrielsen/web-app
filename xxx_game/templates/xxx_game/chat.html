@@ -37,7 +37,7 @@
                 <p>Likes: {{post.likes | length}}</p>
             </div>
             <div class="like-button">
-                <form action="{% url 'like_post' post._id %}" method="post">
+                <form action="{% url 'like_post' post.post_id %}" method="post">
                     {% csrf_token %}
                 <button type="submit">Like</button>
                 </form>
