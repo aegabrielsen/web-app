@@ -130,10 +130,12 @@ def create_post(request):
 
     content = request.POST.get('content')    
     escaped_content = escape_HTML(content)
+    feeling = request.POST.get('feeling')
     if user:
         post = { 
         'username': user['username'],
         'content':escaped_content,
+        'feeling': feeling,
         'likes': []
        
      }
@@ -141,6 +143,7 @@ def create_post(request):
         post = { 
         'username': "Guest",
         'content':content,
+        'feeling': feeling,
         'likes': []
        
      }
@@ -161,6 +164,7 @@ def chat(request):
 
 def escape_HTML(message):
     return message.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
 def like_posts(request,post_id):
     user = get_user_from_auth(request)
     if user is None: 
