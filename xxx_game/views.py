@@ -137,7 +137,6 @@ def create_post(request):
         'content':escaped_content,
         'feeling': feeling,
         'likes': []
-        
        
      }
     if not user:
@@ -146,9 +145,6 @@ def create_post(request):
         'content':content,
         'feeling': feeling,
         'likes': []
-
-
-       
      }
     
     db['posts'].insert_one(post)
