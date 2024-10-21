@@ -16,7 +16,6 @@
         <hr>
         <div class="chat-container">
             <div class="chat-input">
-                <hr>
                 <form action="/create_post" method="post" id= "chat-form">
                 {% csrf_token %}
                 <label> Chat: 
@@ -24,6 +23,7 @@
                 </label>
                 <button type="submit" id="chat-button" >Send</button>
                 </form>
+                <hr>
             </div>
         
 
@@ -31,8 +31,13 @@
         <h2> Messages</h2>
         {% for post in posts %}
         <div class="post">
-            <p>User:{{post.username}}</p>
-            <p>{{post.content}}</p>
+            <div class="message">
+                <p>User:{{post.username}}</p>
+                <p>{{post.content}}</p>
+            </div>
+            <div class="like-button">
+                <button>Like</button>
+            </div>
         </div>
         {% endfor %}
         </div>
