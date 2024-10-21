@@ -127,11 +127,18 @@ def create_post(request):
     user = get_user_from_auth(request)
     print("POST REQUEST:" + str(request.POST))
     content = request.POST.get('content')    
-    post = { 
+    if user:
+        post = { 
+        'username': user['username'],
+        'content':content
+       
+     }
+    if not user:
+        post = { 
         'username': "Guest",
         'content':content
        
-    }
+     }
     
     db['posts'].insert_one(post)
     return redirect ("/chat")
