@@ -134,14 +134,19 @@ def create_post(request):
         post = { 
         'username': user['username'],
         'content':escaped_content,
+        'emotion': "Happy",
         'likes': []
+        
        
      }
     if not user:
         post = { 
         'username': "Guest",
         'content':content,
+        'emotion': "Sad",
         'likes': []
+
+
        
      }
     
@@ -164,7 +169,7 @@ def escape_HTML(message):
 def like_posts(request,post_id):
     user = get_user_from_auth(request)
     if user is None: 
-        return redirect('/')
+        return redirect('/chat')
     
     post = db['posts'].find_one({'_id': ObjectId(post_id)})
     if not post:
@@ -175,6 +180,11 @@ def like_posts(request,post_id):
             {'$push':{'likes': user['username']}}
         )
         return redirect ('/chat')
+    db['posts'].update_one(
+        {'_id':ObjectId(post_id)},
+        {'$pull':{'likes': user['username']}}
+    )
+    return redirect('/chat')
     
     
     
