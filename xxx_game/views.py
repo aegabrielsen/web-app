@@ -125,18 +125,19 @@ def logout(request):
 ## function to create post object
 def create_post(request):
     user = get_user_from_auth(request)
-    print("POST REQUEST:" + str(request.POST))
+
     content = request.POST.get('content')    
+    escaped_content = escape_HTML(content)
     if user:
         post = { 
         'username': user['username'],
-        'content':content
+        'content':escaped_content
        
      }
     if not user:
         post = { 
         'username': "Guest",
-        'content':content
+        'content':escaped_content
        
      }
     
@@ -150,4 +151,5 @@ def chat(request):
     }
     return render(request, 'xxx_game/chat.html',context)
 
-    
+def escape_HTML(message):
+    return message.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
