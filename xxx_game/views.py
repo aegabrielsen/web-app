@@ -151,6 +151,10 @@ def create_post(request):
     return redirect ("/chat")
     
 def chat(request):
+    user = get_user_from_auth(request)
+    if not user:
+        response = redirect('/')
+        
     posts = list(db['posts'].find())
     for post in posts:
         post['post_id'] = str(post['_id'])
