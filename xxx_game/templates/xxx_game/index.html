@@ -48,9 +48,11 @@
             </div>
 
         </form>
+        {% if username %}
         <div class="chat-button">
             <button onclick="window.location.href='chat'">Go to Chat</button>
         </div>
+        {% endif %}
 
         <!-- Logout form -->
         <form action="/logout" method="post" id="logout-container" class="login-register-container">
