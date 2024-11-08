@@ -11,8 +11,9 @@ urlpatterns = [
     path("logout", views.logout, name = "logout"),
     path("create_post",views.create_post,name="create_post"),
     path("chat", views.chat, name = "chat"),
-    path('like_post/<str:post_id>/', views.like_posts, name='like_post')
-    
-
-
+    path('like_post/<str:post_id>/', views.like_posts, name='like_post'),
+    path('game_lobby', views.game_lobby, name = 'game_lobby'),
+    path('game_room', views.game_room, name = 'game_room'),
+    path('game', views.game, name = 'game'),
+    path('upload-avatar/', views.upload_avatar, name='upload_avatar'),
 ]
