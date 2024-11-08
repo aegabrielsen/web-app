@@ -3,10 +3,14 @@ from django.shortcuts import render, redirect
 import os
 import project1.settings as settings
 from django.http import FileResponse
+from django import forms
 import html #HTML ESCAPE
 from pymongo import MongoClient
 import bcrypt
-import uuid    
+import uuid
+import filetype
+import random
+import string
 mongo_client = MongoClient("mongo")
 from bson.objectid import ObjectId
 from django.shortcuts import redirect
@@ -38,16 +42,14 @@ def index(request):
     user = get_user_from_auth(request)
     posts = list(db['posts'].find())
 
-  
-    if user is None:
-        return render(request,"xxx_game/index.html")
+
     context = { 
         "username":user.get('username') if user else "Guest",
-        "posts": posts 
+        "logged_in": user is not None, # used to determine if the user is logged in or not
+        'avatar_url': user.get('avatar') if user and user.get('avatar') else 'avatar/default.png',
     }
     
-
-    response = render(request,"xxx_game/index.html", {"username" : user.get('username')})
+    response = render(request,"xxx_game/index.html", context=context)
     return response
 
 # The middleware is skipped when using django.contrib.staticfiles, so here we do not use django.contrib.staticfiles, but customize the static file processing to set X-Content-Type-Options: nosniff.
@@ -97,11 +99,11 @@ def register(request):
     
     # If the passwords do not match, do nothing
     if password != retype_password:
-        return render(request,"xxx_game/index.html")
+        return render(request,"xxx_game/index.html",{username : 'Guest'})
 
     # If the user is already registered, do nothing
     if user_collection.count_documents({"username" : username}) != 0:
-        return render(request,"xxx_game/index.html")
+        return render(request,"xxx_game/index.html",{username: 'Guest'})
 
     salt = bcrypt.gensalt()
     hash = bcrypt.hashpw(password.encode(), salt)
@@ -110,7 +112,7 @@ def register(request):
 
     user_collection.insert_one(user)
 
-    response = redirect("/", {"username" : username})
+    response = redirect("/", {"username" : 'Guest'})
     return response
 
 # Logout route
@@ -187,6 +189,82 @@ def like_posts(request,post_id):
         {'$pull':{'likes': user['username']}}
     )
     return redirect('/chat')
+
+# path /game_lobby
+def game_lobby(request):
+    user = get_user_from_auth(request)
+
+    context = { 
+        "username":user.get('username') if user else "Guest",
+        "logged_in": user is not None, # used to determine if the user is logged in or not
+        'avatar_url': user.get('avatar') if user and user.get('avatar') else 'avatar/default.png',
+    }
+
+    return render(request, 'xxx_game/game_lobby.html',context)   
+
+# path /game_room
+def game_room(request):
+    user = get_user_from_auth(request)
+
+    context = { 
+        "username":user.get('username') if user else "Guest",
+        "logged_in": user is not None, # used to determine if the user is logged in or not
+        'avatar_url': user.get('avatar') if user and user.get('avatar') else 'avatar/default.png',
+    }
+
+    return render(request, 'xxx_game/game_room.html',context)
+
+# path /game
+def game(request):
+    user = get_user_from_auth(request)
+    context = { 
+        "username":user.get('username') if user else "Guest",
+        "logged_in": user is not None, # used to determine if the user is logged in or not
+        'avatar_url': user.get('avatar') if user and user.get('avatar') else 'avatar/default.png',
+    }
+
+    return render(request, 'xxx_game/game.html',context)
+
+# path /upload-avatar
+def upload_avatar(request):
+    user = get_user_from_auth(request)
     
+    # only logged in users can upload avatars
+    if user is None:
+        return redirect('index')
+
+    content = {
+        "username": user.get('username') if user else "Guest",
+        "logged_in": user is not None, # used to determine if the user is logged in or not
+    }
     
-    
+    if request.method == 'POST':
+        form = forms.Form(request.POST, request.FILES)
+
+
+        if form.is_valid():
+            file = request.FILES['avatar']
+
+            # create the avatar directory if it doesn't exist
+            os.makedirs('xxx_game/static/avatar', exist_ok=True)
+            file_data = file.read()
+
+            # guess the file type
+            file_type = filetype.guess(file_data)
+
+            if file_type is None:
+                # if the file type cannot be guessed, return to the index
+                return redirect('index')
+            
+            elif file_type.MIME == 'image/jpeg' or file_type.MIME == 'image/png':
+                # save the file, avatar name : avatar_<username>_<random_end>.<file_extension>
+
+                rand_end = ''.join(random.choice(string.ascii_letters) for _ in range(10))
+                file_name = 'avatar_'+user['username'] +'_'+ rand_end + '.' + file_type.extension
+                file_path = os.path.join('xxx_game/static/avatar', file_name)
+                with open(file_path, 'wb') as f:
+                    f.write(file_data)
+                user_collection.update_one({'_id': user['_id']}, {'$set': {'avatar': os.path.join('avatar', file_name)}})
+
+            return redirect('index')
+    return redirect('index')
