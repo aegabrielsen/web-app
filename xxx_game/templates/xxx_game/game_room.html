@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game</title>
+    {% load static %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/game_room.css' %}">
+
+    <script src="{% static 'js/base.js' %}"></script>
+    <script src="{% static 'js/game_room.js' %}"></script>
+    
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+</head>
+<body onload="init()" class="main-container">
+
+    <div class="upload-avatar">
+        <div class="upload-avatar-content">
+            <div>
+                <span class="upload-avatar-close">X</span>
+            </div>
+            <div class="upload-avatar-input">
+                {% if logged_in %}
+                <form action="/upload-avatar/" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    Upload:
+                    <input type="file" name="avatar">
+                    <input type="submit" value="Upload">
+                </form>
+                {% else %}
+                <span>only logged user can upload avatar.</span>
+                {% endif %}
+            
+            </div>
+        </div>
+    </div>
+
+    <div class="left-container">
+        <img src="{% static 'images/logo.png' %}" class="logo">
+    </div>
+    <div id="content" class="center-container">
+        <div class="room_id">
+            room id:xxxx
+        </div>
+        <!--TODO: use Django list to update user.or javascript and websocket to update.-->
+        <!-- avatar_url is in user-->
+        <div class="players">
+            <div class="player"><label>Player 1</label><img src="{% static avatar_url %}"></div>
+            <div class="player"><label>Player 1</label><img src="{% static avatar_url %}"></div>
+            <div class="player"><label>Player 1</label><img src="{% static avatar_url %}"></div>
+        </div>
+        <div class="start-game">
+            start game
+        </div>
+
+    </div>
+    <div class="right-container">
+        <div class="user-info">
+            <img src="{% static avatar_url %}" class="avatar">
+            <p>{{username}}</p>
+        </div>
+        <div>
+            <p>Join Code</p>
+            <p>xxxxxxx</p>
+        </div>
+        
+    </div>
+</body>
+</html>

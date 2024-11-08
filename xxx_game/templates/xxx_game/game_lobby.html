@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game</title>
+    {% load static %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/game_lobby.css' %}">
+
+    <script src="{% static 'js/base.js' %}"></script>
+    <script src="{% static 'js/game_lobby.js' %}"></script>
+    
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+</head>
+<body onload="init()" class="main-container">
+    <div class="upload-avatar">
+        <div class="upload-avatar-content">
+            <div>
+                <span class="upload-avatar-close">X</span>
+            </div>
+            <div class="upload-avatar-input">
+                {% if logged_in %}
+                <form action="/upload-avatar/" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    Upload:
+                    <input type="file" name="avatar">
+                    <input type="submit" value="Upload">
+                </form>
+                {% else %}
+                <span>only logged user can upload avatar.</span>
+                {% endif %}
+            
+            </div>
+        </div>
+    </div>
+
+    <div class="left-container">
+        <img src="{% static 'images/logo.png' %}" class="logo">
+    </div>
+    <div id="content" class="right-container">
+        <div style="height:200px;width:200px;">
+            <img src="{% static avatar_url %}" class="avatar">
+        </div>
+        <p>{{username}}</p>
+        
+        <p>Current Public Game</p>
+        <div class="game">
+            <div class="game-item" onclick="alert('change it in game_lobby.html')"><label>Game 1</label><img src="{% static 'images/start.png' %}"></div>
+            <div class="game-item" onclick="alert('change it in game_lobby.html')"><label>Game 2</label><img src="{% static 'images/start.png' %}"></div>
+        </div>
+        
+        <div >
+            <p>Join with Code</p>
+            <div class="join-code">
+                <input><img src="{% static 'images/start.png' %}" class="join">
+            </div>
+        </div>
+        <div>
+            <p class="create_btn" onclick="alert('change in game_lobby.html')">Create Public Game</p>
+            <p class="create_btn" onclick="alert('change in game_lobby.html')">Create Private Game</p>
+        </div>
+
+    </div>
+</body>
+</html>
