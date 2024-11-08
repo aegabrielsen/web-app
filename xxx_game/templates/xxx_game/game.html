@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game</title>
+    {% load static %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/game.css' %}">
+
+    <script src="{% static 'js/game.js' %}"></script>
+    <script src="{% static 'js/base.js' %}"></script>
+    
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+</head>
+<body onload="init()" class="main-container">
+    
+    <div class="upload-avatar">
+        <div class="upload-avatar-content">
+            <div>
+                <span class="upload-avatar-close">X</span>
+            </div>
+            <div class="upload-avatar-input">
+                {% if logged_in %}
+                <form action="/upload-avatar/" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    Upload:
+                    <input type="file" name="avatar">
+                    <input type="submit" value="Upload">
+                </form>
+                {% else %}
+                <span>only logged user can upload avatar.</span>
+                {% endif %}
+            
+            </div>
+        </div>
+    </div>
+
+    <div class="left-container">
+        <div>
+            <img src="{% static 'images/logo.png' %}" class="logo">
+        </div>
+
+        <div>
+            <p>Players: </p>
+            <div>
+                <p>Player1</p>
+                <p>Player2</p>
+                <p>Player3</p>
+                <p>Player4</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="content" class="center-container">
+        <div class="question-answer">
+            <div class="question">
+                <label>What days of the week does cse 312 meet?</label>
+            </div>
+            <div class="answer">
+                <div>
+                    Option1
+                </div>
+                <div>
+                    Option2
+                </div>
+                <div>
+                    Option3
+                </div>
+                <div>
+                    Option4
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="right-container">
+        <div>
+            <img src="{% static avatar_url %}" class="avatar">
+            <h1>{{username}}</h1>
+        </div>
+        <div style="width:300px;">
+            <input/><button>Send</button>
+        </div>
+        <div class="chat-box">
+            abcd
+        </div>
+    </div>
+
+</body>
+</html>

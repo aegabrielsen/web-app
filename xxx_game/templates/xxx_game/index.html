@@ -3,66 +3,95 @@
 <head>
     <title>Game</title>
     {% load static %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/index.css' %}">
+
     <script src="{% static 'js/index.js' %}"></script>
+    <script src="{% static 'js/base.js' %}"></script>
+
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
 </head>
-<body onload="init()" style="background:url({% static 'images/background.jpg' %})">
-    <div id="menu-button">menu
+<body onload="init()" class="main-container">
+    <div class="upload-avatar">
+        <div class="upload-avatar-content">
+            <div>
+                <span class="upload-avatar-close">X</span>
+            </div>
+            <div class="upload-avatar-input">
+                {% if logged_in %}
+                <form action="/upload-avatar/" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    Upload:
+                    <input type="file" name="avatar">
+                    <input type="submit" value="Upload">
+                </form>
+                {% else %}
+                <span>only logged user can upload avatar.</span>
+                {% endif %}
+            
+            </div>
+        </div>
     </div>
-    <div id="menu">
-        <ul>
-            <li>menu1</li>
-            <li>menu2</li>
-            <li>menu3</li>
-            <li>menu4</li>
-        </ul>
+
+    <div class="left-container">
+        <img src="{% static 'images/logo.png' %}" class="logo">
     </div>
-    <div id="header" ></div>
-    <div id="content">
-        
+    <div id="content" class="right-container">
+        <img src="{% static avatar_url %}" class="avatar">
+
         <h1>Welcome, {{username}}</h1>
 
         <!-- Form to login -->
         <form action="/login" method="post" id="login-container" class="login-register-container">
             {% csrf_token %}
-            <div class="login-register-header">Login</div>
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="password" name="password" placeholder="Password" required>
+            <div>
+                Username <input type="text" name="username" placeholder="Username" required>
+            </div>
+            <div>
+                Password <input type="password" name="password" placeholder="Password" required>
+            </div>
             <div class="buttons">
-                
                 <button type="submit">Login</button>
             </div>
-
         </form>
         
         <!-- Form to register -->
         <form action="/register" method="post" id="register-container" class="login-register-container">
             {% csrf_token %}
-            <div class="login-register-header">Register</div>
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <input type="password" name="retype_password" placeholder="Retype Password" required>
+            <div>
+                Username <input type="text" name="username" placeholder="Username" required>
+            </div>
+            <div>
+                Password <input type="password" name="password" placeholder="Password" required>
+            </div>
+            retype_password<input type="password" name="retype_password" placeholder="Retype Password" required>
             <div class="buttons">
                 <button type="submit">Register</button>
             </div>
 
         </form>
-        {% if username %}
+        
         <div class="chat-button">
-            <button onclick="window.location.href='chat'">Go to Chat</button>
+            <p>PLAY NOW</p>
+            <img src="{% static 'images/start.png' %}">
         </div>
-        {% endif %}
 
         <!-- Logout form -->
+         {% if logged_in %}
         <form action="/logout" method="post" id="logout-container" class="login-register-container">
             {% csrf_token %}
             <div class="buttons">
                 <button type="submit">Logout</button>
             </div>
 
-        </form>            
+        </form>      
+        {% endif %}
+
+        
     </div>
-    <div id="footer"></div>
 </body>
+
 </html>
