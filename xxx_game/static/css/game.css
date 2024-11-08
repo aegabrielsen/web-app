@@ -1,0 +1,84 @@
+.main-container{
+    background-color: #dae0e2;
+    display: flex;
+}
+.left-container{
+    flex: 1;
+
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.center-container{
+    flex: 2;
+
+    display: flex;
+    justify-content: center;
+}
+.right-container{
+    flex: 1;
+
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.logo{
+    padding:10px;
+    width: 300px;
+    height: 300px;
+}
+#header{
+    background-color: rgba(0,0,0,0);
+    padding: 10px;
+    text-align: center;
+    font-size: 40px;
+    font-weight: bold;
+    color: white;
+    width: 100%;
+    height: 150px;
+}
+#content{
+    padding: 10px;
+    text-align: center;
+    font-size: 20px;
+    color: #333;
+    width: 100%;
+    height: 680px;
+}
+h1{
+    color: white;
+}
+
+.buttons button{
+
+    height: 40px;
+    padding: 10px;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    color: white;
+    background-color: #65558f;
+    border-radius: 15%;
+}
+.question-answer{
+    padding: 20% 0 0 0;
+}
+.question{
+    padding: 30px 10px;
+}
+.answer{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    grid-gap: 30px;
+}
+.answer div{
+    text-align: center;
+}
+.chat-box{
+    width: 300px;
+    height: 400px;
+    background-color: white;
+    overflow-y: scroll;
+}
