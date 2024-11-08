@@ -80,7 +80,7 @@
     background-color: gray;
 }
 
-.join-code{
+.join-game{
     width: 100%;
     height: 30px;
 
@@ -90,4 +90,51 @@
 }
 .create_btn:hover{
     background-color: gray;
+}
+
+.create-game{
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    background-color: rgba(0, 0, 0, 0.5);
+
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+.create-game-content{
+    background: white;  
+    padding: 20px;
+    border-radius: 8px;
+
+    width: 400px;
+    height: 400px;
+}
+
+.create-game-input{
+height: 400px;
+width: 400px;
+
+display: flex;
+justify-content: center;
+align-items: center;
+}
+
+.create-game-close {
+float:right;
+color: gray;
+font-size: 28px;
+font-weight: bold;
+cursor: pointer;
+position: relative;
+}
+
+.create-game-close:hover,
+.create-game-close:focus {
+color: black;
 }
