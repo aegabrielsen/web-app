@@ -60,7 +60,7 @@
     background-color: #65558f;
     border-radius: 15%;
 }
-.players{
+.player-list{
     height: 500px;
     width: 500px;
     overflow-y: scroll;
