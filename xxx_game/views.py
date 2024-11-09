@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 import os
 import project1.settings as settings
-from django.http import FileResponse
+from django.http import FileResponse,JsonResponse
 from django import forms
 import html #HTML ESCAPE
 from pymongo import MongoClient
@@ -14,8 +14,14 @@ import string
 mongo_client = MongoClient("mongo")
 from bson.objectid import ObjectId
 from django.shortcuts import redirect
+
+# databases
 db = mongo_client["webapp"]
 user_collection = db["users"]
+game_collection = db["games"]
+game_post_collection = db["game_posts"]
+
+
 global_salt = b'$2b$12$ldSsU24BK6EPANRbUpvXRu'
 
 def get_user_from_auth(request):
@@ -212,26 +218,52 @@ def game_lobby(request):
 
     return render(request, 'xxx_game/game_lobby.html',context)   
 
-# path /game_room
-def game_room(request):
+# path /game_room/<game_id>
+def game_room(request,id):
     user = get_user_from_auth(request)
+
+    import logging
+    logging.warning('id'+id)
+
+    game = game_collection.find_one({'_id': ObjectId(id)})
+    if game is None:
+        return redirect('game_lobby')
+    
+    if game['status'] != 'waiting':
+        response = redirect('game_lobby')
+        response.set_cookie('alert-info', 'Game already started')
+        return response
 
     context = { 
         "username":user.get('username') if user else "Guest",
         "logged_in": user is not None, # used to determine if the user is logged in or not
         'avatar_url': user.get('avatar') if user and user.get('avatar') else 'avatar/default.png',
+        'game_name': game['name'],
+        'join_code': game['join-code'],
+        'game_id': str(game['_id'])
     }
 
     return render(request, 'xxx_game/game_room.html',context)
 
 # path /game
-def game(request):
+def game(request,id):
     user = get_user_from_auth(request)
     context = { 
         "username":user.get('username') if user else "Guest",
         "logged_in": user is not None, # used to determine if the user is logged in or not
         'avatar_url': user.get('avatar') if user and user.get('avatar') else 'avatar/default.png',
     }
+
+    game = game_collection.find_one({'_id': ObjectId(id)})
+    if game is None:
+        response = redirect('game_lobby')
+        response.set_cookie('alert-info', 'Game not found')
+        return response
+
+    game['status'] = 'playing'
+    game_collection.update_one({'_id': ObjectId(id)}, {'$set': {'status': 'playing'}})
+
+    context['game_id'] = str(game['_id'])
 
     return render(request, 'xxx_game/game.html',context)
 
@@ -278,3 +310,115 @@ def upload_avatar(request):
 
             return redirect('index')
     return redirect('index')
+
+# path /create_game
+def create_game(request):
+    user = get_user_from_auth(request)
+    if user is None:
+        return redirect('index')
+    
+    name = request.POST.get('name', None)
+    join_code = request.POST.get('join_code', None)
+    is_public = request.POST.get('is_public', None)
+
+    # join code must be unique
+    if game_collection.count_documents({'join-code': join_code}) != 0:
+        response = redirect('game_lobby')
+        response.set_cookie('alert-info', 'Join code already exists')
+        return response
+    
+    # game name must be unique
+    if game_collection.count_documents({'name': name}) != 0:
+        response = redirect('game_lobby')
+        response.set_cookie('alert-info', 'Game name already exists')
+        return response
+    
+    import logging
+    logging.warning('public'+is_public)
+    logging.warning('name'+name)
+    logging.warning('join_code' + join_code)
+
+    game = {
+        'created_by': user['username'],
+        'players': [user['username']],
+        'status': 'waiting', # waiting, playing, finished
+        'name': name,
+        'join-code': join_code,
+        'is_public': is_public
+    }
+    game_collection.insert_one(game)
+
+    response = redirect('game_lobby')
+    response.set_cookie('alert-info', 'Game created')
+    return response
+
+# path /games
+def get_game(request):
+    user = get_user_from_auth(request)
+
+    game_list = list(game_collection.find({'is_public': 'true'}))
+
+    game_list = [{'name': game['name'], 'join_code': game['join-code'],'id':str(game['_id'])} for game in game_list]
+    response = JsonResponse(game_list, safe=False)
+    return response
+
+# path /players/<game_id>
+def get_game_player(request,id):
+    user = get_user_from_auth(request)
+    game = game_collection.find_one({'_id': ObjectId(id)})
+    if game is None:
+        return redirect('game_lobby')
+    
+    players = game['players']
+    player_list = []
+    for player in players:
+        player = user_collection.find_one({'username': player})
+        player_list.append({'avatar':player.get('avatar') if player.get('avatar') else 'avatar/default.png', 'username': player['username']})
+
+    response = JsonResponse(player_list, safe=False)
+    return response
+
+# path /game_chat
+def game_chat(request):
+    user = get_user_from_auth(request)
+
+    if not user:
+        response = redirect('/')
+        
+    posts = list(db['game_posts'].find())
+    for post in posts:
+        post['post_id'] = str(post['_id'])
+
+    if request.POST.get('message') is None:
+        return JsonResponse({'status': 'no message'})
+    
+    if request.POST.get('message') == '':
+        return JsonResponse({'status': 'empty message'})
+    
+    message = escape_HTML(request.POST.get('message'))
+
+    post = {
+        'game_id': request.POST.get('game_id'),
+        'username': user['username'],
+        'message': message,
+    }    
+
+    game_post_collection.insert_one(post)
+
+    return redirect('/game/'+request.POST.get('game_id'))
+
+# path /game_chat_list/<game_id>
+def game_chat_list(request,id):
+    user = get_user_from_auth(request)
+    if not user:
+        response = redirect('/')
+    
+    posts = game_post_collection.find({'game_id': id})
+    posts = list(posts)
+    import logging
+    logging.warning('post'+str(list(posts)))
+    for post in posts:
+        post['_id'] = str(post['_id'])
+    
+    
+    return JsonResponse(posts,safe=False)
