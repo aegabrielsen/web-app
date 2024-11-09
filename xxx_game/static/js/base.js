@@ -38,16 +38,14 @@ function show_info(){
     if(getCookie("alert-info")==null){
         return;
     }
-    if(document.getElementById("show-info").style.display == "block"){
-        return;
-    }
+    
     alert_info = getCookie("alert-info");
-    // alert(alert_info);
-    document.getElementById("show-info").style.display = "block";
-    document.getElementById("info-content").innerText = alert_info;
-    document.getElementById("info-close").addEventListener("click", function(){
-        document.getElementById("show-info").style.display = "none";
-    });  
+    alert(alert_info);
+    // document.getElementById("show-info").style.display = "block";
+    // document.getElementById("info-content").innerText = alert_info;
+    // document.getElementById("info-close").addEventListener("click", function(){
+    //     document.getElementById("show-info").style.display = "none";
+    // });  
 
     deleteCookie("alert-info");
 }
