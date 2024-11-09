@@ -80,9 +80,13 @@
             <h1>{{username}}</h1>
         </div>
         <div style="width:300px;">
-            <input/><button>Send</button>
+            <form action="/game_chat" method="post">
+                {% csrf_token %}
+                <input type="text" id="game-id" name="game_id" hidden value="{{game_id}}"/>
+                <input type="text" name="message" style="width:200px;"/>
+                <input type="submit" value="Send"/>
         </div>
-        <div class="chat-box">
+        <div class="chat-box" id="chat-box">
             abcd
         </div>
     </div>

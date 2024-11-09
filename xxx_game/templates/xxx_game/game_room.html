@@ -42,14 +42,11 @@
     </div>
     <div id="content" class="center-container">
         <div class="room_id">
-            room id:xxxx
+            game_name:{{game_name}}
         </div>
         <!--TODO: use Django list to update user.or javascript and websocket to update.-->
         <!-- avatar_url is in user-->
-        <div class="players">
-            <div class="player"><label>Player 1</label><img src="{% static avatar_url %}"></div>
-            <div class="player"><label>Player 1</label><img src="{% static avatar_url %}"></div>
-            <div class="player"><label>Player 1</label><img src="{% static avatar_url %}"></div>
+        <div class="player-list" id="player-list">
         </div>
         <div class="start-game" id="start-game-btn">
             start game
@@ -62,8 +59,9 @@
             <p>{{username}}</p>
         </div>
         <div>
+            <input type="text" id="game-id" hidden value="{{game_id}}">
             <p>Join Code</p>
-            <p>xxxxxxx</p>
+            <p>{{join_code}}</p>
         </div>
         
     </div>

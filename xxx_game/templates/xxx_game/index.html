@@ -85,6 +85,11 @@
             <img src="{% static 'images/start.png' %}">
         </div>
 
+        <div class="chat-button" id="go-chat">
+            <p>CHAT</p>
+            <img style="width:100px;height:100px;" src="{% static 'images/chat.png' %}">
+        </div>
+
         <!-- Logout form -->
          {% if logged_in %}
         <form action="/logout" method="post" id="logout-container" class="login-register-container">
