@@ -45,7 +45,7 @@
                 {% if logged_in %}
                 <form action="/create_game/" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
-                    <span>Create Game:(TODO: Should use websocket)</span>
+                    <span>Create Game:</span>
 
                     <p>Name</p> <input type="text" name="name" required>
                     <p>Join-Code</p> <input id="join-code" type="text" name="join_code" required>
@@ -67,6 +67,8 @@
 
     <div class="left-container">
         <img src="{% static 'images/logo.png' %}" class="logo">
+        <button onclick="window.location.href='/'">go to login </button>
+        <button onclick="window.location.href='/logout'">logout</button>
     </div>
     <div id="content" class="right-container">
         <div style="height:200px;width:200px;">
@@ -83,12 +85,11 @@
         <div >
             <p>Join with Code</p>
             <div class="join-game">
-                <input><img src="{% static 'images/start.png' %}" class="join" onclick="alert('no implement')">
+                <input id="join-code2" type="text" name="join_code"/><img src="{% static 'images/start.png' %}" class="join" onclick="join_game()">
             </div>
         </div>
         <div>
-            <p class="create_btn" onclick="show_create_game()">Create Public Game</p>
-            <p class="create_btn" onclick="show_create_game()">Create Private Game</p>
+            <p class="create_btn" onclick="show_create_game()">Create Game</p>
         </div>
 
     </div>
