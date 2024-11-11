@@ -21,4 +21,8 @@ urlpatterns = [
     path('players/<str:id>', views.get_game_player, name = 'players'),
     path('game_chat', views.game_chat, name = 'game_chat'),
     path('game_chat_list/<str:id>', views.game_chat_list, name = 'game_chat_list'),
+    path('leave_game/<str:id>', views.leave_game, name = 'leave_game'),
+    path('finish_game/<str:id>', views.finish_game, name = 'finish_game'),
+    path('join_game/<str:join_code>', views.join_game, name = 'join_game'),
+    path('check_game_start/<str:id>', views.check_game_start, name = 'delete_game'),
 ]

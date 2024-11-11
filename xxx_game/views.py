@@ -11,6 +11,7 @@ import uuid
 import filetype
 import random
 import string
+import logging
 mongo_client = MongoClient("mongo")
 from bson.objectid import ObjectId
 from django.shortcuts import redirect
@@ -20,6 +21,8 @@ db = mongo_client["webapp"]
 user_collection = db["users"]
 game_collection = db["games"]
 game_post_collection = db["game_posts"]
+
+game_user_collection = db["game_users"]
 
 
 global_salt = b'$2b$12$ldSsU24BK6EPANRbUpvXRu'
@@ -207,6 +210,8 @@ def like_posts(request,post_id):
     return redirect('/chat')
 
 # path /game_lobby
+# url
+
 def game_lobby(request):
     user = get_user_from_auth(request)
 
@@ -216,23 +221,49 @@ def game_lobby(request):
         'avatar_url': user.get('avatar') if user and user.get('avatar') else 'avatar/default.png',
     }
 
+    if user is not None:
+        # check if user is already in a game, if so, redirect to the game room
+        user_game = game_user_collection.find_one({'username': user['username']})
+        if user_game is not None:
+            game = game_collection.find_one({'_id': ObjectId(user_game['game_id'])})
+            if game is not None:
+                return redirect('game_room/'+str(game['_id']))
+    else:
+        response = redirect('index')
+        response.set_cookie('alert-info', 'Guest cannot join game, please login')
+        return redirect('index')
+
     return render(request, 'xxx_game/game_lobby.html',context)   
 
-# path /game_room/<game_id>
+# path /game_room/<game_id> 
+# User join the game, and one user can only join one game at a time.
 def game_room(request,id):
     user = get_user_from_auth(request)
 
-    import logging
-    logging.warning('id'+id)
-
     game = game_collection.find_one({'_id': ObjectId(id)})
     if game is None:
+        game_user_collection.delete_one({'username': user['username']})
         return redirect('game_lobby')
     
+    game_user = game_user_collection.find_one({'game_id':id, 'username': user['username']})
+    if game_user is not None and ( game['status'] == 'playing' or game['status'] == 'finished'):
+        # user is already in the game, redirect to the game
+        return redirect('/game/'+str(game['_id']))
+
     if game['status'] != 'waiting':
         response = redirect('game_lobby')
         response.set_cookie('alert-info', 'Game already started')
         return response
+    
+    if user['username'] not in game['players']:
+        # add user to the game
+        game['players'].append(user['username'])
+        game_collection.update_one({'_id': ObjectId(id)}, {'$set': {'players': game['players']}})
+
+    if game_user_collection.find_one({'username': user['username']}) is None:
+        # add user to the game_user collection
+        game_user_collection.insert_one({'game_id': id, 'username': user['username']})
+    
 
     context = { 
         "username":user.get('username') if user else "Guest",
@@ -259,9 +290,9 @@ def game(request,id):
         response = redirect('game_lobby')
         response.set_cookie('alert-info', 'Game not found')
         return response
-
-    game['status'] = 'playing'
-    game_collection.update_one({'_id': ObjectId(id)}, {'$set': {'status': 'playing'}})
+    if game['status'] == 'waiting':
+        game['status'] = 'playing'
+        game_collection.update_one({'_id': ObjectId(id)}, {'$set': {'status': 'playing'}})
 
     context['game_id'] = str(game['_id'])
 
@@ -269,6 +300,7 @@ def game(request,id):
 
 # path /upload-avatar
 def upload_avatar(request):
+    
     user = get_user_from_auth(request)
     
     # only logged in users can upload avatars
@@ -312,13 +344,15 @@ def upload_avatar(request):
     return redirect('index')
 
 # path /create_game
+# create new game. after creating the game, the user will be redirected to the game room
+# ajax call;
 def create_game(request):
     user = get_user_from_auth(request)
     if user is None:
         return redirect('index')
     
-    name = request.POST.get('name', None)
-    join_code = request.POST.get('join_code', None)
+    name = escape_HTML(request.POST.get('name', None))
+    join_code = escape_HTML(request.POST.get('join_code', None))
     is_public = request.POST.get('is_public', None)
 
     # join code must be unique
@@ -332,11 +366,6 @@ def create_game(request):
         response = redirect('game_lobby')
         response.set_cookie('alert-info', 'Game name already exists')
         return response
-    
-    import logging
-    logging.warning('public'+is_public)
-    logging.warning('name'+name)
-    logging.warning('join_code' + join_code)
 
     game = {
         'created_by': user['username'],
@@ -346,18 +375,19 @@ def create_game(request):
         'join-code': join_code,
         'is_public': is_public
     }
-    game_collection.insert_one(game)
+    game = game_collection.insert_one(game)
 
-    response = redirect('game_lobby')
+
+    response = redirect('/game_room/'+str(game.inserted_id))
     response.set_cookie('alert-info', 'Game created')
     return response
 
 # path /games
+# ajax call to get all public games
 def get_game(request):
     user = get_user_from_auth(request)
 
     game_list = list(game_collection.find({'is_public': 'true'}))
-
     game_list = [{'name': game['name'], 'join_code': game['join-code'],'id':str(game['_id'])} for game in game_list]
     response = JsonResponse(game_list, safe=False)
     return response
@@ -415,10 +445,105 @@ def game_chat_list(request,id):
     
     posts = game_post_collection.find({'game_id': id})
     posts = list(posts)
-    import logging
-    logging.warning('post'+str(list(posts)))
     for post in posts:
         post['_id'] = str(post['_id'])
     
     
     return JsonResponse(posts,safe=False)
+
+# path /leave_game/<game_id>
+# ajax call to leave the game
+# code 0: success
+# code 100: not logged in
+# code 101: not in the game
+# code 102: game already started
+def leave_game(request,id):
+    user = get_user_from_auth(request)
+    if not user:
+        response = JsonResponse({'code':100,'status': 'not logged in'})
+        response.set_cookie('alert-info', 'You are not logged in')
+        return response
+    
+    game_user = game_user_collection.find_one({'game_id':id, 'username': user['username']})
+
+    logging.warning('game_user:'+str(game_user))
+    if game_user is None:
+        response = JsonResponse({'code':101,'status': 'not in the game'})
+        response.set_cookie('alert-info', 'You are not in the game')
+        return response
+
+    game = game_collection.find_one({'_id': ObjectId(id)})
+    logging.warning('game:'+str(game))
+    if game is not None:
+        if game['status'] != 'waiting' and game['status'] != 'finished':
+            response = JsonResponse({'code':102,'status': 'game already started'})
+            response.set_cookie('alert-info', 'Game already started , only waiting and finished game can be left')
+            return response
+        
+        if user['username'] in game['players']:
+            game['players'].remove(user['username'])
+            game_collection.update_one({'_id': ObjectId(id)}, {'$set': {'players': game['players']}})
+    
+    game_user_collection.delete_one({'game_id': id, 'username': user['username']})
+
+
+    response = JsonResponse({'code':0,'status': 'success'})
+    return response
+
+# path /finish_game/<game_id>
+def finish_game(request,id):
+    game = game_collection.find_one({'_id': ObjectId(id)})
+    if game is None:
+        
+        response = redirect('game_lobby')
+        response.set_cookie('alert-info', 'Game not found')
+        return response
+
+    logging.warning('game'+str(game))
+    game['status'] = 'finished'
+    logging.warning(game_collection.update_one({'_id': ObjectId(id)}, {'$set': {'status': 'finished'}}))
+    logging.warning('game'+str(game_collection.find_one({'_id': ObjectId(id)})))
+
+    response = redirect('/game/'+str(game['_id']))
+    response.set_cookie('alert-info', 'Game finished')
+    return response
+
+# path /join_game/<join_code>
+def join_game(request,join_code):
+    user = get_user_from_auth(request)
+    logging.warning('user:'+str(user))
+    if not user:
+        response = redirect('game_lobby')
+        response.set_cookie('alert-info', 'You are not logged in')
+        return response
+    
+    game = game_collection.find_one({'join-code': join_code})
+    if game is None:
+        logging.warning('game not found')
+        response = redirect('game_lobby')
+        response.set_cookie('alert-info', 'Game not found')
+        return response
+    
+    if game['status'] != 'waiting':
+        logging.warning('game already started')
+        response = redirect('game_lobby')
+        response.set_cookie('alert-info', 'Game already started')
+        return response
+    
+    response = redirect('/game_room/'+str(game['_id']))
+    return response
+
+# path /check_game_start/<game_id>
+def check_game_start(request,id):
+    game = game_collection.find_one({'_id': ObjectId(id)})
+    if game is None:
+        response = HttpResponse('Game not found')
+        response.set_cookie('alert-info', 'Game not found')
+        return response
+
+    if game['status'] == 'playing':
+        response = HttpResponse('True')
+        return response
+
+    response = HttpResponse('False')
+    return response
