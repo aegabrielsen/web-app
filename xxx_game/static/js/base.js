@@ -41,6 +41,7 @@ function show_info(){
     
     alert_info = getCookie("alert-info");
     alert(alert_info);
+    console.log(alert_info);
     // document.getElementById("show-info").style.display = "block";
     // document.getElementById("info-content").innerText = alert_info;
     // document.getElementById("info-close").addEventListener("click", function(){

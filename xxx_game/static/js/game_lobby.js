@@ -7,7 +7,7 @@ function init(){
     });
 
     
-    show_info()
+    setInterval(show_info, 1000);
     
     update_games();
     setInterval(update_games,1000);
@@ -22,27 +22,44 @@ function generate_random_join_code(){
     document.getElementById("join-code").value = Math.random().toString(36).substring(2, 8);
 }
 
+old_game_text = "";
 function update_games(){
     let xhr = new XMLHttpRequest();
     xhr.open("GET", "/games", true);
     xhr.onreadystatechange = function(){
         if(xhr.readyState == 4 && xhr.status == 200){
+            if (old_game_text != xhr.responseText){
+                old_game_text = xhr.responseText;
+                document.getElementById("game-list").innerHTML = "";
+                JSON.parse(xhr.responseText).forEach(game => {
+                    let game_div = document.createElement("div");
+                    game_div.className = "game-item";
+                    game_div.onclick = function(){
+                        window.location.href = "/game_room/" + game["id"];
+                    };
 
-            document.getElementById("game-list").innerHTML = "";
+                    game_div.innerHTML = `
+                    <label>${game["name"]}</label>
+                    <img src="static/images/start.png">
+                    `;
+                    document.getElementById("game-list").appendChild(game_div);
+                    }
+                );
+            }
+        }
+    }
+    xhr.send();
+}
 
-            JSON.parse(xhr.responseText).forEach(game => {
-                let game_div = document.createElement("div");
-                game_div.className = "game-item";
-                game_div.onclick = function(){
-                    window.location.href = "/game_room/" + game["id"];
-                };
+function join_game(){
+    let xhr = new XMLHttpRequest();
+    join_code = document.getElementById("join-code2").value;
+    let path = "/join_game/"+join_code;
 
-                game_div.innerHTML = `
-                <label>${game["name"]}</label>
-                <img src="static/images/start.png">
-                `;
-                document.getElementById("game-list").appendChild(game_div);
-                });
+    xhr.open("GET", path , true);
+    xhr.onreadystatechange = function(){
+        if(xhr.readyState == 4 && xhr.status == 200){
+            window.location.reload();
         }
     }
     xhr.send();
