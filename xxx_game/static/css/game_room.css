@@ -6,8 +6,8 @@
     flex: 1;
 
     display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: center;
 }
 .center-container{
     flex: 2;
