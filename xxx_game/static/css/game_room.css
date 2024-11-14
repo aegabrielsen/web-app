@@ -86,3 +86,23 @@
 .start-game:hover{
     background-color: gray;
 }
+
+.chat-button button{
+    width: 30%;
+    height: 30px;
+    margin: 10px;
+    font-size: 20px;
+}
+
+.button_{
+    height: 40px;
+    padding: 10px;
+    margin: 10px;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    color: white;
+    background-color: #65558f;
+    border-radius: 15%;
+
+}
