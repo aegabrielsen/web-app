@@ -44,6 +44,26 @@
 
     <div class="left-container">
         <img src="{% static 'images/logo.png' %}" class="logo">
+        <div class="chat-button">
+            <p>PLAY NOW</p>
+            <img src="{% static 'images/start.png' %}">
+        </div>
+
+        <div class="chat-button" id="go-chat">
+            <p>CHAT</p>
+            <img style="width:100px;height:100px;" src="{% static 'images/chat.png' %}">
+        </div>
+
+        <!-- Logout form -->
+         {% if logged_in %}
+        <form action="/logout" method="post" id="logout-container" class="login-register-container">
+            {% csrf_token %}
+            <div class="buttons">
+                <button type="submit" style="width: 100px;">Logout</button>
+            </div>
+
+        </form>      
+        {% endif %}
     </div>
     <div id="content" class="right-container">
         <img src="{% static avatar_url %}" class="avatar">
@@ -80,26 +100,7 @@
 
         </form>
         
-        <div class="chat-button">
-            <p>PLAY NOW</p>
-            <img src="{% static 'images/start.png' %}">
-        </div>
-
-        <div class="chat-button" id="go-chat">
-            <p>CHAT</p>
-            <img style="width:100px;height:100px;" src="{% static 'images/chat.png' %}">
-        </div>
-
-        <!-- Logout form -->
-         {% if logged_in %}
-        <form action="/logout" method="post" id="logout-container" class="login-register-container">
-            {% csrf_token %}
-            <div class="buttons">
-                <button type="submit">Logout</button>
-            </div>
-
-        </form>      
-        {% endif %}
+        
 
         
     </div>

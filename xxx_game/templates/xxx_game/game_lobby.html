@@ -67,8 +67,14 @@
 
     <div class="left-container">
         <img src="{% static 'images/logo.png' %}" class="logo">
-        <button onclick="window.location.href='/'">go to login </button>
-        <button onclick="window.location.href='/logout'">logout</button>
+
+        <div class="chat-button" id="go-chat">
+            <p>CHAT</p>
+            <img style="width:100px;height:100px;" src="{% static 'images/chat.png' %}">
+        </div>
+
+        <button onclick="window.location.href='/'" class="button_">go to login </button>
+        <button onclick="window.location.href='/logout'" class="button_">logout</button>
     </div>
     <div id="content" class="right-container">
         <div style="height:200px;width:200px;">

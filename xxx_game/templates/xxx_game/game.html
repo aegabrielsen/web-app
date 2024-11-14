@@ -38,20 +38,17 @@
     </div>
 
     <div class="left-container">
+        <input type="text" id="game-id" name="game_id" hidden value="{{game_id}}"/>
         <div>
             <img src="{% static 'images/logo.png' %}" class="logo">
         </div>
-        <button onclick="leave_game()"> leave_game </button>
-        <div>
-            <p>Players: </p>
-            <div>
-                <p>Player1</p>
-                <p>Player2</p>
-                <p>Player3</p>
-                <p>Player4</p>
-            </div>
+        <div class="chat-button" id="go-chat">
+            <p>CHAT</p>
+            <img style="width:100px;height:100px;" src="{% static 'images/chat.png' %}">
         </div>
-        <button onclick="finish_game()">finish game(use to Test) should be delete.</button>
+        <button onclick="leave_game()" class="button_"> leave_game </button>
+        <button onclick="window.location.href='/'" class="button_">go to login </button>
+        <button onclick="window.location.href='/logout'" class="button_">logout</button>
     </div>
 
     <div id="content" class="center-container">
@@ -80,16 +77,49 @@
             <img src="{% static avatar_url %}" class="avatar">
             <h1>{{username}}</h1>
         </div>
-        <div style="width:300px;">
+
+        <input type="text" id="game-id" name="game_id" hidden value="{{game_id}}"/>
+
+        <!-- <button onclick="leave_game()"> leave_game </button> -->
+        <div>
+            <p>Players: </p>
+            <div>
+                <p>Player1</p>
+                <p>Player2</p>
+                <p>Player3</p>
+                <p>Player4</p>
+            </div>
+        </div>
+        <!-- <button onclick="finish_game()">finish game(use to Test) should be delete.</button> -->
+        <!-- <div style="width:300px;">
             <form action="/game_chat" method="post">
                 {% csrf_token %}
                 <input type="text" id="game-id" name="game_id" hidden value="{{game_id}}"/>
                 <input type="text" name="message" style="width:200px;"/>
                 <input type="submit" value="Send"/>
-        </div>
-        <div class="chat-box" id="chat-box">
+        </div> -->
+        <!-- <div class="chat-input">
+            <form action="/game_chat" method="post" id= "chat-form">
+            {% csrf_token %}
+            <label> Chat: 
+                <input id="chatInput" name="content" type="text" placeholder="Start typing here..." required>
+            </label>
+
+            <label for="feeling">Feeling:</label>
+            <select name="feeling" id="feeling" required>
+                <option value="Happy">Happy</option>
+                <option value="Sad">Sad</option>
+                <option value="Angry">Angry</option>
+                <option value="Neutral" selected>Neutral</option>
+            </select>
+
+            <button type="button" id="chat-button" onclick="send_post()">Send</button>
+            </form>
+            <hr>
+        </div> -->
+        <!-- <div class="chat-box" id="chat-box">
             abcd
-        </div>
+        </div> -->
     </div>
 
 </body>
