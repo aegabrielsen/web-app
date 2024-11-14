@@ -5,6 +5,11 @@ function init(){
     create_game_close_btn.addEventListener("click", function(){
         document.getElementsByClassName("create-game")[0].style.display = "none";
     });
+    
+    chat_btn = document.getElementById("go-chat")
+    chat_btn.onclick = function(){
+        window.location.href = "/chat";
+    }
 
     
     setInterval(show_info, 1000);
@@ -59,7 +64,10 @@ function join_game(){
     xhr.open("GET", path , true);
     xhr.onreadystatechange = function(){
         if(xhr.readyState == 4 && xhr.status == 200){
-            window.location.reload();
+            json_data = JSON.parse(xhr.responseText);
+            if(json_data["status"] == "success"){
+                window.location.href = "/game_room/" + json_data["game_id"];
+            }
         }
     }
     xhr.send();

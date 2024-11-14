@@ -1,36 +1,44 @@
 function init(){
     add_avatar_event();
-
-    update_game_chat();
-    setInterval(show_info, 1000);
-    setInterval(update_game_chat,1000);
-}
-
-old_chat_text = "";
-function update_game_chat(){
-    let xhr = new XMLHttpRequest();
-    game_id = document.getElementById("game-id").value;
-
-    xhr.open("GET", "/game_chat_list/"+game_id, true);
-    xhr.onreadystatechange = function(){
-        if(xhr.readyState == 4 && xhr.status == 200){
-
-            let chat = document.getElementById("chat-box");
-            if(old_chat_text != xhr.responseText){
-                chat.innerHTML = "";
-                JSON.parse(xhr.responseText).forEach(function(item){
-                    chat.innerHTML += "<div>"+item["username"]+": "+item["message"]+"</div>";
-                });
-                old_chat_text = xhr.responseText;
-            }
-        }
+    chat_btn = document.getElementById("go-chat")
+    chat_btn.onclick = function(){
+        window.location.href = "/chat";
     }
-    xhr.send();
+
+    update_post()
+    setInterval(show_info, 1000);
+    // setInterval(update_game_chat,1000);
+    // setInterval(update_post,1000);
 }
+
+
+// old_chat_text = "";
+// function update_game_chat(){
+//     let xhr = new XMLHttpRequest();
+//     game_id = document.getElementById("game-id").value;
+
+//     xhr.open("GET", "/game_chat_list/"+game_id, true);
+//     xhr.onreadystatechange = function(){
+//         if(xhr.readyState == 4 && xhr.status == 200){
+
+//             let chat = document.getElementById("chat-box");
+//             if(old_chat_text != xhr.responseText){
+//                 chat.innerHTML = "";
+//                 JSON.parse(xhr.responseText).forEach(function(item){
+//                     chat.innerHTML += "<div>"+item["username"]+": "+item["message"]+"</div>";
+//                 });
+//                 old_chat_text = xhr.responseText;
+//             }
+//         }
+//     }
+//     xhr.send();
+// }
 
 function leave_game(){
     let xhr = new XMLHttpRequest();
     game_id = document.getElementById("game-id").value;
+    console.log(game_id,document.getElementById("game-id").value);
+
     path = "/leave_game/"+game_id;
 
     xhr.open("GET", path , true);
@@ -40,7 +48,7 @@ function leave_game(){
             if(result['code'] == 0){
                 window.location.href = "/game_lobby";
             }else if(result['code'] == 100){
-                window.location.href = "/index";
+                window.location.href = "/";
             }else if(result['code'] == 101){
                 window.location.href = "/game_lobby";
             }else if(result['code'] == 102){
@@ -60,6 +68,67 @@ function finish_game(){
     xhr.onreadystatechange = function(){
         if(xhr.readyState == 4 && xhr.status == 200){
             window.location.reload();
+        }
+    }
+    xhr.send();
+}
+
+function send_post(){
+    let xhr = new XMLHttpRequest();
+    let content = document.getElementById("chatInput").value;
+    let feeling = document.getElementById("feeling").value;
+
+    csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+    xhr.open("POST", "/game_chat", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader("X-CSRFToken", csrf_token);
+
+    xhr.onreadystatechange = function(){
+        if(xhr.readyState == 4 && xhr.status == 200){
+            document.getElementById("chatInput").value = "";
+            document.getElementById("feeling").value = "";
+        }
+    }
+    xhr.send(JSON.stringify({"content":content, "feeling":feeling}));
+}
+
+old_chat_text = "";
+function update_post(){
+    let xhr = new XMLHttpRequest();
+    xhr.open("GET", "/chat_list", true);
+    xhr.onreadystatechange = function(){
+        if(xhr.readyState == 4 && xhr.status == 200){
+
+            let chat = document.getElementById("chat-box");
+            if(old_chat_text != xhr.responseText){
+                chat.innerHTML = "";
+                JSON.parse(xhr.responseText).forEach(function(item){
+                    chat.innerHTML += 
+                    `<div class="post">
+                        <div class="message">
+                            <p>User:${item.username}</p>
+                            <p>${item.content}</p>
+                            <p>Emotion:${item.feeling}</p>
+                            <p>Likes: ${item.likes.length}</p>
+                        </div>
+                        <div class="like-button">
+                            <button type="button" onclick="like_post('${'/like_post/'+item.post_id}')">Like</button>
+                        </div>
+                    </div>`;
+                });
+                old_chat_text = xhr.responseText;
+            }
+        }
+    }
+    xhr.send();
+}
+
+function like_post(path){
+    let xhr = new XMLHttpRequest();
+    xhr.open("GET", path, true);
+    xhr.onreadystatechange = function(){
+        if(xhr.readyState == 4 && xhr.status == 200){
+            // update_post();
         }
     }
     xhr.send();

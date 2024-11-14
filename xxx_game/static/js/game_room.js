@@ -5,6 +5,11 @@ function init(){
         window.location.href = "/game/"+game_id;
     });
 
+    chat_btn = document.getElementById("go-chat")
+    chat_btn.onclick = function(){
+        window.location.href = "/chat";
+    }
+
     setInterval(show_info, 1000);
     update_players();
     setInterval(update_players,1000);
