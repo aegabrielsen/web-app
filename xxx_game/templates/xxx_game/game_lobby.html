@@ -36,8 +36,45 @@
         </div>
     </div>
 
+    <div class="create-game">
+        <div class="create-game-content">
+            <div>
+                <span class="create-game-close">X</span>
+            </div>
+            <div class="create-game-input">
+                {% if logged_in %}
+                <form action="/create_game/" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <span>Create Game:</span>
+
+                    <p>Name</p> <input type="text" name="name" required>
+                    <p>Join-Code</p> <input id="join-code" type="text" name="join_code" required>
+                    <button type="button" onclick="generate_random_join_code()">Generate</button>
+                    <p> is_private</p>
+                    <span>Public</span><input type="radio" name="is_public" value="true" required>
+                    <span>Private</span><input type="radio" name="is_public" value="false" required>
+                    <br>
+                    <input type="submit" value="Create">
+
+                </form>
+                {% else %}
+                <span>only logged user can create game.</span>
+                {% endif %}
+            
+            </div>
+        </div>
+    </div>
+
     <div class="left-container">
         <img src="{% static 'images/logo.png' %}" class="logo">
+
+        <div class="chat-button" id="go-chat">
+            <p>CHAT</p>
+            <img style="width:100px;height:100px;" src="{% static 'images/chat.png' %}">
+        </div>
+
+        <button onclick="window.location.href='/'" class="button_">go to login </button>
+        <button onclick="window.location.href='/logout'" class="button_">logout</button>
     </div>
     <div id="content" class="right-container">
         <div style="height:200px;width:200px;">
@@ -46,20 +83,19 @@
         <p>{{username}}</p>
         
         <p>Current Public Game</p>
-        <div class="game">
-            <div class="game-item" onclick="alert('change it in game_lobby.html')"><label>Game 1</label><img src="{% static 'images/start.png' %}"></div>
-            <div class="game-item" onclick="alert('change it in game_lobby.html')"><label>Game 2</label><img src="{% static 'images/start.png' %}"></div>
+        <div class="game-list" id="game-list">
+            <div class="game-item" onclick="window.location.href='/game_room'"><label>Game 1</label><img src="{% static 'images/start.png' %}"></div>
+            <div class="game-item" onclick="window.location.href='/game_room'"><label>Game 2</label><img src="{% static 'images/start.png' %}"></div>
         </div>
         
         <div >
             <p>Join with Code</p>
-            <div class="join-code">
-                <input><img src="{% static 'images/start.png' %}" class="join">
+            <div class="join-game">
+                <input id="join-code2" type="text" name="join_code"/><img src="{% static 'images/start.png' %}" class="join" onclick="join_game()">
             </div>
         </div>
         <div>
-            <p class="create_btn" onclick="alert('change in game_lobby.html')">Create Public Game</p>
-            <p class="create_btn" onclick="alert('change in game_lobby.html')">Create Private Game</p>
+            <p class="create_btn" onclick="show_create_game()">Create Game</p>
         </div>
 
     </div>

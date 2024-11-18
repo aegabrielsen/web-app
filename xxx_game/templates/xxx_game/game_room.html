@@ -39,19 +39,24 @@
 
     <div class="left-container">
         <img src="{% static 'images/logo.png' %}" class="logo">
+        
+        <div class="chat-button" id="go-chat">
+            <p>CHAT</p>
+            <img style="width:100px;height:100px;" src="{% static 'images/chat.png' %}">
+        </div>
+        <button onclick="leave_game()" class="button_"> leave_game </button>
+        <button onclick="window.location.href='/'" class="button_">go to login </button>
+        <button onclick="window.location.href='/logout'" class="button_">logout</button>
     </div>
     <div id="content" class="center-container">
         <div class="room_id">
-            room id:xxxx
+            game_name:{{game_name}}
         </div>
         <!--TODO: use Django list to update user.or javascript and websocket to update.-->
         <!-- avatar_url is in user-->
-        <div class="players">
-            <div class="player"><label>Player 1</label><img src="{% static avatar_url %}"></div>
-            <div class="player"><label>Player 1</label><img src="{% static avatar_url %}"></div>
-            <div class="player"><label>Player 1</label><img src="{% static avatar_url %}"></div>
+        <div class="player-list" id="player-list">
         </div>
-        <div class="start-game">
+        <div class="start-game" id="start-game-btn">
             start game
         </div>
 
@@ -62,8 +67,9 @@
             <p>{{username}}</p>
         </div>
         <div>
+            <input type="text" id="game-id" hidden value="{{game_id}}">
             <p>Join Code</p>
-            <p>xxxxxxx</p>
+            <p>{{join_code}}</p>
         </div>
         
     </div>

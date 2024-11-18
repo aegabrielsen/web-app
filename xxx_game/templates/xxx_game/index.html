@@ -15,6 +15,12 @@
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
 </head>
 <body onload="init()" class="main-container">
+    
+    <div id="show-info">
+        <span id="info-close">X</span>
+        <p id="info-content">info</p>
+    </div>
+
     <div class="upload-avatar">
         <div class="upload-avatar-content">
             <div>
@@ -38,11 +44,31 @@
 
     <div class="left-container">
         <img src="{% static 'images/logo.png' %}" class="logo">
+        <div class="chat-button">
+            <p>PLAY NOW</p>
+            <img src="{% static 'images/start.png' %}">
+        </div>
+
+        <div class="chat-button" id="go-chat">
+            <p>CHAT</p>
+            <img style="width:100px;height:100px;" src="{% static 'images/chat.png' %}">
+        </div>
+
+        <!-- Logout form -->
+         {% if logged_in %}
+        <form action="/logout" method="post" id="logout-container" class="login-register-container">
+            {% csrf_token %}
+            <div class="buttons">
+                <button type="submit" style="width: 100px;">Logout</button>
+            </div>
+
+        </form>      
+        {% endif %}
     </div>
     <div id="content" class="right-container">
         <img src="{% static avatar_url %}" class="avatar">
 
-        <h1>Welcome, {{username}}</h1>
+        <h1 id="username-h1">Welcome, {{username}}</h1>
 
         <!-- Form to login -->
         <form action="/login" method="post" id="login-container" class="login-register-container">
@@ -74,21 +100,7 @@
 
         </form>
         
-        <div class="chat-button">
-            <p>PLAY NOW</p>
-            <img src="{% static 'images/start.png' %}">
-        </div>
-
-        <!-- Logout form -->
-         {% if logged_in %}
-        <form action="/logout" method="post" id="logout-container" class="login-register-container">
-            {% csrf_token %}
-            <div class="buttons">
-                <button type="submit">Logout</button>
-            </div>
-
-        </form>      
-        {% endif %}
+        
 
         
     </div>
