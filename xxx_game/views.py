@@ -21,9 +21,11 @@ import json
 db = mongo_client["webapp"]
 user_collection = db["users"]
 game_collection = db["games"]
-game_post_collection = db["game_posts"]
 game_user_collection = db["game_users"]
-guest_collection = db["guests"]
+
+# game_post_collection = db["game_posts"]
+
+# guest_collection = db["guests"]
 
 
 global_salt = b'$2b$12$ldSsU24BK6EPANRbUpvXRu'
@@ -144,7 +146,7 @@ def logout(request):
     # Hash token and check for it in the database
     auth_token_hash = bcrypt.hashpw(auth_token.encode(), global_salt) # Hash the unhashed cookie auth token so we can check for it in the DB
     user_collection.update_one({ "auth_token_hash": auth_token_hash}, {"$unset": {"auth_token_hash": ""}}) # Delete auth token field from DB
-    response = redirect("/")
+    response = redirect("/",{"username" : 'Guest'})
     response.delete_cookie("auth_token") # Delete the cookie
     return response
 
@@ -361,27 +363,29 @@ def game_room(request,id):
 
     return render(request, 'xxx_game/game_room.html',context)
 
-# path /game/
+# path /join_game/
 # to start game
-def game(request,id):
+def game(request):
     user = get_user_from_auth(request)
     context = { 
         "username":user.get('username') if user else "Guest",
         "logged_in": user is not None, # used to determine if the user is logged in or not
         'avatar_url': user.get('avatar') if user and user.get('avatar') else 'avatar/default.png',
     }
+    if user is not None and game_user_collection.count_documents({'username':user['username']}) == 0:
+        game_user_collection.insert_one({'username': user['username']})
 
-    game = game_collection.find_one({'_id': ObjectId(id)})
-    if game is None:
-        response = redirect('game_lobby')
-        response.set_cookie('alert-info', 'Game not found')
-        return response
+    # game = game_collection.find_one({'_id': ObjectId(id)})
+    # if game is None:
+    #     response = redirect('game_lobby')
+    #     response.set_cookie('alert-info', 'Game not found')
+    #     return response
     
-    if game['status'] == 'waiting':
-        game['status'] = 'playing'
-        game_collection.update_one({'_id': ObjectId(id)}, {'$set': {'status': 'playing'}})
+    # if game['status'] == 'waiting':
+    #     game['status'] = 'playing'
+    #     game_collection.update_one({'_id': ObjectId(id)}, {'$set': {'status': 'playing'}})
 
-    context['game_id'] = str(game['_id'])
+    # context['game_id'] = str(game['_id'])
 
     return render(request, 'xxx_game/game.html',context)
 
@@ -479,17 +483,17 @@ def get_game(request):
     response = JsonResponse(game_list, safe=False)
     return response
 
-# path /players/<game_id>
-def get_game_player(request,id):
+# path /get_players/
+def get_game_player(request):
     user = get_user_from_auth(request)
-    game = game_collection.find_one({'_id': ObjectId(id)})
-    if game is None:
-        return redirect('game_lobby')
+    # game = game_collection.find_one({'_id': ObjectId(id)})
+    # if game is None:
+    #     return redirect('game_lobby')
     
-    players = game['players']
+    players = game_user_collection.find({})
     player_list = []
     for player in players:
-        player = user_collection.find_one({'username': player})
+        player = user_collection.find_one({'username': player['username']})
         if player:
             player_list.append({'avatar':player.get('avatar') if player.get('avatar') else 'avatar/default.png', 'username': player['username']})
         else:
@@ -545,7 +549,7 @@ def game_chat_list(request,id):
 # code 100: not logged in
 # code 101: not in the game
 # code 102: game already started
-def leave_game(request,id):
+def leave_game(request):
     user = get_user_from_auth(request)
 
     # if not user:
@@ -560,25 +564,27 @@ def leave_game(request,id):
     #     response.set_cookie('alert-info', 'You are not in the game')
     #     return response
 
-    game = game_collection.find_one({'_id': ObjectId(id)})
-    if game is not None:
-        # if game['status'] != 'waiting' and game['status'] != 'finished':
-        #     response = JsonResponse({'code':102,'status': 'game already started'})
-        #     response.set_cookie('alert-info', 'Game already started , only waiting and finished game can be left')
-        #     return response
-        if user is not None:
-            if user['username'] in game['players']:
-                game['players'].remove(user['username'])
-                game_collection.update_one({'_id': ObjectId(id)}, {'$set': {'players': game['players']}})
+    # game = game_collection.find_one({'_id': ObjectId(id)})
+    # if game is not None:
+    #     # if game['status'] != 'waiting' and game['status'] != 'finished':
+    #     #     response = JsonResponse({'code':102,'status': 'game already started'})
+    #     #     response.set_cookie('alert-info', 'Game already started , only waiting and finished game can be left')
+    #     #     return response
+    #     if user is not None:
+    #         if user['username'] in game['players']:
+    #             game['players'].remove(user['username'])
+    #             game_collection.update_one({'_id': ObjectId(id)}, {'$set': {'players': game['players']}})
 
-        else:
-            guest = request.COOKIES.get('guest',None)
-            if guest is not None and guest in game['players']:
-                game['players'].remove(guest)
-                game_collection.update_one({'_id': ObjectId(id)}, {'$set': {'players': game['players']}})
+    #     else:
+    #         guest = request.COOKIES.get('guest',None)
+    #         if guest is not None and guest in game['players']:
+    #             game['players'].remove(guest)
+    #             game_collection.update_one({'_id': ObjectId(id)}, {'$set': {'players': game['players']}})
     
     # game_user_collection.delete_one({'game_id': id, 'username': user['username']})
 
+    if game_user_collection.count_documents({'username':user['username']}) > 0:
+        game_user_collection.delete_one({'username':user['username']})
 
     response = JsonResponse({'code':0,'status': 'success'})
     return response
