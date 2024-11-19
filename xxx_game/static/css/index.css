@@ -11,6 +11,10 @@
 }
 .right-container{
     flex: 3;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 .logo{
     padding:10px;
@@ -133,4 +137,10 @@
 #info-close{
     float: right;
     padding: 10px;
+}
+
+#change-icon{
+    font-size:10px;
+    color: blue;
+    border-bottom: 1px solid black;
 }
