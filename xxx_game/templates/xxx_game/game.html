@@ -46,9 +46,9 @@
             <p>CHAT</p>
             <img style="width:100px;height:100px;" src="{% static 'images/chat.png' %}">
         </div>
-        <button onclick="leave_game()" class="button_"> leave_game </button>
-        <button onclick="window.location.href='/'" class="button_">go to login </button>
-        <button onclick="window.location.href='/logout'" class="button_">logout</button>
+        <button onclick="leave_game()" class="button_"> home </button>
+        <!-- <button onclick="window.location.href='/'" class="button_">go to login </button>
+        <button onclick="window.location.href='/logout'" class="button_">logout</button> -->
     </div>
 
     <div id="content" class="center-container">
@@ -83,11 +83,11 @@
         <!-- <button onclick="leave_game()"> leave_game </button> -->
         <div>
             <p>Players: </p>
-            <div>
-                <p>Player1</p>
-                <p>Player2</p>
-                <p>Player3</p>
-                <p>Player4</p>
+            <div id="players">
+                <p><img src="{% static avatar_url %}" class="avatar-small"> Player1</p>
+                <p><img src="{% static avatar_url %}" class="avatar-small">Player2</p>
+                <p><img src="{% static avatar_url %}" class="avatar-small">Player3</p>
+                <p><img src="{% static avatar_url %}" class="avatar-small">Player4</p>
             </div>
         </div>
         <!-- <button onclick="finish_game()">finish game(use to Test) should be delete.</button> -->
