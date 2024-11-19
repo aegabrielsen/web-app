@@ -1,6 +1,6 @@
 FROM python:3.8.2
 # Set the home directory to /root
-ENV HOME /root
+ENV HOME=/root
 # cd into the home directory
 WORKDIR /root
 
@@ -17,4 +17,11 @@ EXPOSE 8080
 ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.2.1/wait /wait
 # Run the app
 RUN chmod +x /wait
-CMD /wait && python3 -u manage.py
+#CMD /wait && python3 -u manage.py
+
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Set entrypoint
+ENTRYPOINT ["/entrypoint.sh"]
