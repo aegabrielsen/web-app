@@ -4,11 +4,11 @@ function init(){
     btn = document.getElementsByClassName("chat-button")[0];
     btn.onclick = function(){
         username_h1 = document.getElementById("username-h1").innerText;
-        // if (username_h1 == "Welcome, Guest"){
-        //     alert("Please login first!");
-        //     return;
-        // }
-        window.location.href = "/game_lobby";
+        if (username_h1 == "Welcome, Guest"){
+            alert("Please login first!");
+            return;
+        }
+        window.location.href = "/game/";
     }
 
     chat_btn = document.getElementById("go-chat")

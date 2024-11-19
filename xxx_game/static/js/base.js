@@ -10,6 +10,13 @@ function add_avatar_event(){
         avatar_box.style.display = "flex";
     });
 
+    change_icon = document.getElementById("change-icon");
+    if(change_icon != null){
+        change_icon.addEventListener("click", function(){
+            avatar_box.style.display = "flex";
+        });
+    }
+
     btn = document.getElementsByClassName("upload-avatar-close")[0];
     btn.addEventListener("click", function(){
         avatar_box.style.display = "none";

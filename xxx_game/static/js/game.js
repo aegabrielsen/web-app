@@ -5,8 +5,10 @@ function init(){
         window.location.href = "/chat";
     }
 
-    update_post()
+    // update_post()
     setInterval(show_info, 1000);
+    update_players()
+    setInterval(update_players,1000);
     // setInterval(update_game_chat,1000);
     // setInterval(update_post,1000);
 }
@@ -39,18 +41,18 @@ function leave_game(){
     game_id = document.getElementById("game-id").value;
     console.log(game_id,document.getElementById("game-id").value);
 
-    path = "/leave_game/"+game_id;
+    path = "/leave_game/";
 
     xhr.open("GET", path , true);
     xhr.onreadystatechange = function(){
         if(xhr.readyState == 4 && xhr.status == 200){
             result = JSON.parse(xhr.responseText);
             if(result['code'] == 0){
-                window.location.href = "/game_lobby";
+                window.location.href = "/";
             }else if(result['code'] == 100){
                 window.location.href = "/";
             }else if(result['code'] == 101){
-                window.location.href = "/game_lobby";
+                window.location.href = "/";
             }else if(result['code'] == 102){
                 // window.location.href = "/game/"+game_id;
             }
@@ -129,6 +131,27 @@ function like_post(path){
     xhr.onreadystatechange = function(){
         if(xhr.readyState == 4 && xhr.status == 200){
             // update_post();
+        }
+    }
+    xhr.send();
+}
+
+old_player_text = "";
+function update_players(){
+    let xhr = new XMLHttpRequest();
+    xhr.open("GET", "/get_players", true);
+    xhr.onreadystatechange = function(){
+        if(xhr.readyState == 4 && xhr.status == 200){
+            if (old_player_text != xhr.responseText){
+                let players = document.getElementById("players");
+                players.innerHTML = "";
+                JSON.parse(xhr.responseText).forEach(function(item){
+                    players.innerHTML += "<p><img src='/static/"+item['avatar']+"' class='avatar-small'>"+item['username']+"</p>"; 
+                    // class='player'><label>"+player['username']+"</label><img src='/static/"+player['avatar']+"'></div>";
+                    // "<p><img src="{% static avatar_url %}" class="avatar-small"> Player1</p>
+                });
+                old_player_text = xhr.responseText;
+            }
         }
     }
     xhr.send();
