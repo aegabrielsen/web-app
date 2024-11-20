@@ -45,8 +45,7 @@ def get_user_from_auth(request):
     auth_token_hash = bcrypt.hashpw(auth_token.encode(), global_salt)
 
     user = user_collection.find_one({"auth_token_hash" : auth_token_hash})
-    if user is None:
-        return None
+
     return user
 
 # Create your views here.

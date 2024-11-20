@@ -6,8 +6,13 @@
     <title>Home Pages</title>
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/chat.css' %}">
+
+    <script src="{% static 'js/index.js' %}"></script>
+    <script src="{% static 'js/base.js' %}"></script>
+
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
 </head>
-<body>
+<body onload="startWebsocket()">
     <div class="contents">
         <h1>Home Page</h1>
         <div class="back-button"></div>

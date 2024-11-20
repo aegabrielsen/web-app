@@ -3,3 +3,4 @@ bcrypt
 requests
 django
 filetype
+channels[daphne]

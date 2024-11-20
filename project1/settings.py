@@ -20,6 +20,8 @@ ALLOWED_HOSTS = []
 
 # Application definition
 INSTALLED_APPS = [
+    'daphne',
+    'xxx_game',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -84,3 +86,6 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'xxx_game/static')]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Websockets
+ASGI_APPLICATION = "project1.asgi.application"
