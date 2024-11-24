@@ -42,11 +42,11 @@ class Consumer(AsyncWebsocketConsumer):
         # create_post_test(auth)
 
         # create_post_test(self.scope["headers"])
-        create_post(username, content, feeling)
+        post_id = str(create_post(username, content, feeling))
 
         # Send message to room group
         await self.channel_layer.group_send(
-            self.room_group_name, {"type": "chat.message", "content": content, "feeling": feeling, "username":username}
+            self.room_group_name, {"type": "chat.message", "content": content, "feeling": feeling, "username":username, "id": post_id}
         )
 
     # Receive message from room group
@@ -54,9 +54,10 @@ class Consumer(AsyncWebsocketConsumer):
         content = event["content"]
         feeling = event["feeling"]
         username = event["username"]
+        post_id = event["id"]
 
         # Send message to WebSocket
-        await self.send(text_data=json.dumps({"content": content, "feeling": feeling, "username": username}))
+        await self.send(text_data=json.dumps({"content": content, "feeling": feeling, "username": username, "id": post_id}))
 
 def cookie_parse(headers):
     cookie_header = headers.get(b"cookie", b"").decode("utf-8")
@@ -87,4 +88,4 @@ def create_post(username, content, feeling):
     'likes': []
      }
     
-    db['posts'].insert_one(post)
+    return db['posts'].insert_one(post).inserted_id # Returns the mongoDB _id of the post
