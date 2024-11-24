@@ -176,8 +176,8 @@ def create_post(request):
      }
     
     db['posts'].insert_one(post)
-    return HttpResponse("Successful chat")
-    # return redirect ("/chat")
+    # return HttpResponse("Successful chat")
+    return redirect ("/chat")
 
 def chat_list(request):
     user = get_user_from_auth(request)
@@ -217,6 +217,10 @@ def like_posts_ajax(request,post_id):
 
 def chat(request):
     user = get_user_from_auth(request)
+    if user:
+        username = user.get('username')
+    else:
+        username = "Guest"
         
     posts = list(db['posts'].find())
     for post in posts:
@@ -224,7 +228,8 @@ def chat(request):
 
 
     context = { 
-        'posts':posts
+        'posts':posts,
+        'username':username
     }
     return render(request, 'xxx_game/chat.html',context)
 

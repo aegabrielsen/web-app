@@ -27,6 +27,7 @@
                 <label> Chat: 
                     <input id="chatInput" name="content" type="text" placeholder="Start typing here..." required>
                 </label>
+                <!-- <input type="hidden" id="username" name="username" value="{{ username }}"> -->
                 <label for="feeling">Feeling:</label>
                 <select name="feeling" id="feeling" required>
                     <option value="Happy">Happy</option>
@@ -90,11 +91,13 @@
             console.log(`data: ${e.data}`)
             // document.querySelector('#chat-log').value += (data.message + '\n');
             document.querySelector('#chat-log').innerHTML += (
-                `<div class="message">
-                <p>User:TODO</p>
+                `<div class="post">
+                <div class="message">
+                <p>User:${data.username}</p>
                 <p>${data.content}</p>
                 <p>Emotion:${data.feeling}</p>
-                <p>Likes: TODO</p>
+                <p>Likes: 0</p>
+                </div>
                 </div>`
             );
         };
@@ -103,21 +106,6 @@
             console.error('Chat socket closed unexpectedly');
         };
 
-        // document.querySelector('#chat-message-input').focus();
-        // document.querySelector('#chat-message-input').onkeyup = function(e) {
-        //     if (e.key === 'Enter') {  // enter, return
-        //         document.querySelector('#chat-message-submit').click();
-        //     }
-        // };
-
-        // document.querySelector('#chat-message-submit').onclick = function(e) {
-        //     const messageInputDom = document.querySelector('#chat-message-input');
-        //     const message = messageInputDom.value;
-        //     chatSocket.send(JSON.stringify({
-        //         'message': message
-        //     }));
-        //     messageInputDom.value = '';
-        // };
     </script>
 </body>
 </html>
