@@ -1,7 +1,6 @@
 import json
 from channels.generic.websocket import WebsocketConsumer
 
-# This is not written for our project. It is an example from the tutorial.
 class Consumer(WebsocketConsumer):
     def connect(self):
         self.accept()
@@ -11,6 +10,9 @@ class Consumer(WebsocketConsumer):
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        message = text_data_json["message"]
+        print(text_data_json)
+        print(text_data_json["content"])
+        print(text_data_json["feeling"])
+        # message = text_data_json["message"]
 
-        self.send(text_data=json.dumps({"message": message}))
+        self.send(text_data=json.dumps({"content": text_data_json["content"], "feeling": text_data_json["feeling"]}))

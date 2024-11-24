@@ -176,7 +176,8 @@ def create_post(request):
      }
     
     db['posts'].insert_one(post)
-    return redirect ("/chat")
+    return HttpResponse("Successful chat")
+    # return redirect ("/chat")
 
 def chat_list(request):
     user = get_user_from_auth(request)
