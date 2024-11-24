@@ -89,3 +89,13 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # Websockets
 ASGI_APPLICATION = "project1.asgi.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            # "hosts": [("127.0.0.1", 6379)],
+            "hosts": [("redis", 6379)],
+        },
+    },
+}
