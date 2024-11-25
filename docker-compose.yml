@@ -2,14 +2,14 @@ version: "3.9"
 services:
   mongo:
     image: mongo:4.2.5
-    ports:
-      - "27018:27017"
+    #ports:
+    #  - "27018:27017"
 
   redis:
     image: redis:latest
     container_name: redis_container  # Optional: Name the Redis container
-    ports:
-      - "6379:6379"  # Map the default Redis port
+    #ports:
+    #  - "6379:6379"  # Map the default Redis port
     volumes:
       - redis_data:/data  # Persist Redis data
     restart: unless-stopped  # Ensure Redis restarts automatically
