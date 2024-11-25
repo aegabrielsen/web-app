@@ -90,36 +90,49 @@
                 <p><img src="{% static avatar_url %}" class="avatar-small">Player4</p>
             </div>
         </div>
-        <!-- <button onclick="finish_game()">finish game(use to Test) should be delete.</button> -->
-        <!-- <div style="width:300px;">
-            <form action="/game_chat" method="post">
-                {% csrf_token %}
-                <input type="text" id="game-id" name="game_id" hidden value="{{game_id}}"/>
-                <input type="text" name="message" style="width:200px;"/>
-                <input type="submit" value="Send"/>
-        </div> -->
-        <!-- <div class="chat-input">
-            <form action="/game_chat" method="post" id= "chat-form">
-            {% csrf_token %}
-            <label> Chat: 
-                <input id="chatInput" name="content" type="text" placeholder="Start typing here..." required>
-            </label>
+        <script>
+            const chatSocket = new WebSocket(
+                'ws://'
+                + window.location.host
+                + '/ws/game/'
+            );
+            
+            // document.querySelector('form').addEventListener('submit', function(event) {
+            // event.preventDefault();
+    
+            // const formData = new FormData(this);
+            // const data = {};
+    
+            // formData.forEach((value, key) => {
+            //     data[key] = value;
+            // });
+    
+            // console.log(JSON.stringify(data))
+            // chatSocket.send(JSON.stringify(data));
+            // document.querySelector('#chatInput').value = "";
+            // });
+    
+            chatSocket.onmessage = function(e) {
+                // const data = JSON.parse(e.data);
+                // console.log(`data: ${e.data}`)
+                // // document.querySelector('#chat-log').value += (data.message + '\n');
+                // document.querySelector('#chat-log').innerHTML += (
+                //     `<div class="post">
+                //     </div>`
+                // );
 
-            <label for="feeling">Feeling:</label>
-            <select name="feeling" id="feeling" required>
-                <option value="Happy">Happy</option>
-                <option value="Sad">Sad</option>
-                <option value="Angry">Angry</option>
-                <option value="Neutral" selected>Neutral</option>
-            </select>
-
-            <button type="button" id="chat-button" onclick="send_post()">Send</button>
-            </form>
-            <hr>
-        </div> -->
-        <!-- <div class="chat-box" id="chat-box">
-            abcd
-        </div> -->
+                let players = document.getElementById("players");
+                players.innerHTML = "";
+                JSON.parse(e.data).forEach(function(item){
+                    players.innerHTML += "<p><img src='/static/"+item['avatar']+"' class='avatar-small'>"+item['username']+"</p>"; 
+                });
+            };
+    
+            chatSocket.onclose = function(e) {
+                console.error('Chat socket closed unexpectedly');
+            };
+    
+        </script>
     </div>
 
 </body>

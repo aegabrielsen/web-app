@@ -4,3 +4,5 @@ requests
 django
 filetype
 channels[daphne]
+redis
+channels-redis
