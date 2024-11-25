@@ -2,7 +2,7 @@ version: "3.9"
 services:
   mongo:
     image: mongo:4.2.5
-    #ports:
+    # ports:
     #  - "27018:27017"
 
   redis:

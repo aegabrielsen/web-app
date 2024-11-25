@@ -7,8 +7,8 @@ function init(){
 
     // update_post()
     setInterval(show_info, 1000);
-    update_players()
-    setInterval(update_players,1000);
+    // update_players()
+    // setInterval(update_players,1000);
     // setInterval(update_game_chat,1000);
     // setInterval(update_post,1000);
 }

@@ -1,5 +1,7 @@
 import json
 import bcrypt
+from django.http import JsonResponse
+
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 from pymongo import MongoClient
@@ -24,6 +26,7 @@ class Consumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         # Leave room group
+
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     # Receive message from WebSocket
@@ -58,6 +61,78 @@ class Consumer(AsyncWebsocketConsumer):
 
         # Send message to WebSocket
         await self.send(text_data=json.dumps({"content": content, "feeling": feeling, "username": username, "id": post_id}))
+
+
+class GameConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        # self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
+        # self.room_group_name = f"chat_{self.room_name}"
+        self.room_group_name = f"chat_room"
+
+        # Join room group
+        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+
+        await self.accept()
+        user = get_user_from_auth(cookie_parse(dict(self.scope["headers"])))
+        if user:
+            username = user.get('username')
+        else:
+            username = "Guest"
+        if game_user_collection.count_documents({'username':user['username']}) < 1:
+            game_user_collection.insert_one({'username': username})# insert player
+        await self.send(json.dumps(get_player_list()))# Send a response with new player list
+        await self.channel_layer.group_send(
+            self.room_group_name, {"type": "chat.message", "data": get_player_list()}
+        )
+
+    async def disconnect(self, close_code):
+        user = get_user_from_auth(cookie_parse(dict(self.scope["headers"])))
+        if user:
+            username = user.get('username')
+        else:
+            username = "Guest"
+        if game_user_collection.count_documents({'username':user['username']}) > 0:
+            game_user_collection.delete_one({'username':user['username']})
+        await self.channel_layer.group_send(
+            self.room_group_name, {"type": "chat.message", "data": get_player_list()}
+        )
+        # Leave room group
+        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+
+    # Receive message from WebSocket
+    async def receive(self, text_data):
+        # text_data_json = json.loads(text_data)
+
+        # user = get_user_from_auth(cookie_parse(dict(self.scope["headers"])))
+        # if user:
+        #     username = user.get('username')
+        # else:
+        #     username = "Guest"
+
+        # Send message to room group
+        await self.channel_layer.group_send(
+            self.room_group_name, {"type": "chat.message", "data": get_player_list()}
+        )
+
+    # Receive message from room group
+    async def chat_message(self, event):
+        # Send message to WebSocket
+        await self.send(json.dumps(get_player_list()))
+
+
+def get_player_list():
+    players = game_user_collection.find({})
+    player_list = []
+    for player in players:
+        player = user_collection.find_one({'username': player['username']})
+        if player:
+            player_list.append({'avatar':player.get('avatar') if player.get('avatar') else 'avatar/default.png', 'username': player['username']})
+        else:
+            player_list.append({'avatar':'avatar/default.png', 'username': 'Guest'})
+
+    # response = JsonResponse(player_list, safe=False)
+    # return response
+    return player_list
 
 def cookie_parse(headers):
     cookie_header = headers.get(b"cookie", b"").decode("utf-8")
