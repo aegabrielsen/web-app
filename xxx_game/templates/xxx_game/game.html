@@ -57,16 +57,16 @@
                 <label id="question-text">Question still loading</label>
             </div>
             <div class="answer">
-                <div id="answer1">
+                <div id="answer1" style="cursor: pointer;color:black;">
                     Option1
                 </div>
-                <div id="answer2">
+                <div id="answer2" style="cursor: pointer;color:black;">
                     Option2
                 </div>
-                <div id="answer3">
+                <div id="answer3" style="cursor: pointer;color:black;">
                     Option3
                 </div>
-                <div id="answer4">
+                <div id="answer4" style="cursor: pointer;color:black;">
                     Option4
                 </div>
             </div>
@@ -99,12 +99,51 @@
                 + '/ws/game/'
             );
             
+            document.getElementById("answer1").onclick = function() {
+                const data = {};
+                data['answer'] = document.getElementById("answer1").innerText
+                chatSocket.send(JSON.stringify(data));
+                document.getElementById("answer1").style.color = "red";
+                document.getElementById("answer2").style.color = "black";
+                document.getElementById("answer3").style.color = "black";
+                document.getElementById("answer4").style.color = "black";
+            }
+            
+            document.getElementById("answer2").onclick = function() {
+                const data = {};
+                data['answer'] = document.getElementById("answer2").innerText
+                chatSocket.send(JSON.stringify(data));
+                document.getElementById("answer1").style.color = "black";
+                document.getElementById("answer2").style.color = "red";
+                document.getElementById("answer3").style.color = "black";
+                document.getElementById("answer4").style.color = "black";
+            }
+            
+            document.getElementById("answer3").onclick = function() {
+                const data = {};
+                data['answer'] = document.getElementById("answer3").innerText
+                chatSocket.send(JSON.stringify(data));
+                document.getElementById("answer1").style.color = "black";
+                document.getElementById("answer2").style.color = "black";
+                document.getElementById("answer3").style.color = "red";
+                document.getElementById("answer4").style.color = "black";
+            }
+            
+            document.getElementById("answer4").onclick = function() {
+                const data = {};
+                data['answer'] = document.getElementById("answer4").innerText
+                chatSocket.send(JSON.stringify(data));
+                document.getElementById("answer1").style.color = "black";
+                document.getElementById("answer2").style.color = "black";
+                document.getElementById("answer3").style.color = "black";
+                document.getElementById("answer4").style.color = "red";
+            }
     
             chatSocket.onmessage = function(e) {
                 const data = JSON.parse(e.data);
 
                 if ("trivia" in data) {
-                    if(data["timer"] === 20 || document.getElementById("question-text").textContent === "Question still loading") {
+                    if(data["timer"] === 10 || document.getElementById("question-text").textContent === "Question still loading") {
                     let question = document.getElementById("question-text");
                     let answer1 = document.getElementById("answer1");
                     let answer2 = document.getElementById("answer2");
@@ -119,9 +158,13 @@
                         [answerList[i], answerList[j]] = [answerList[j], answerList[i]];
                     }
                     answer1.innerHTML = answerList[0];
+                    answer1.style.color = "black";
                     answer2.innerHTML = answerList[1];
+                    answer2.style.color = "black";
                     answer3.innerHTML = answerList[2];
+                    answer3.style.color = "black";
                     answer4.innerHTML = answerList[3]; 
+                    answer4.style.color = "black";
 
                     let lastAnswer = document.getElementById("last-correct-answer");
                     lastAnswer.innerHTML = `Last answer was: ${data["last_answer"]}`

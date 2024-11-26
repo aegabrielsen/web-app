@@ -87,6 +87,8 @@ class GameConsumer(AsyncWebsocketConsumer):
         # await self.send(json.dumps(get_player_list()))# Send a response with new player list
         
         game_user_collection.update_one({'username': username}, { "$set": { "score": "0" } })
+        game_user_collection.update_one({'username': username}, { "$set": { "answer": "NO ANSWER" } })
+        game_user_collection.update_one({'username': username}, { "$set": { "rounds": "0" } })
 
         await self.send(json.dumps({"player_list": get_player_list()}))
         # await self.send({"player_list": json.dumps(get_player_list())})
@@ -125,10 +127,16 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     # Receive message from WebSocket
     async def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        answer = text_data_json["answer"]
+
+        user = get_user_from_auth(cookie_parse(dict(self.scope["headers"])))
+        if user:
+            game_user_collection.update_one({'username': user.get('username')}, { "$set": { "answer": answer } })
         # Send message to room group
-        await self.channel_layer.group_send(
-            self.room_group_name, {"type": "chat.message", "player_list": get_player_list()}
-        )
+        # await self.channel_layer.group_send(
+        #     self.room_group_name, {"type": "chat.message", "player_list": get_player_list()}
+        # )
 
     # Receive message from room group
     async def chat_message(self, event):
@@ -140,7 +148,8 @@ class GameConsumer(AsyncWebsocketConsumer):
         trivia = event["trivia"]
         timer = event["timer"]
         last_answer = event["last_answer"]
-        await self.send(json.dumps({"trivia": trivia, "timer": timer, "last_answer": last_answer}))
+        player_list = event["player_list"]
+        await self.send(json.dumps({"trivia": trivia, "timer": timer, "last_answer": last_answer, "player_list": player_list}))
 
     async def send_data_timer(self):
         # channel_layer = get_channel_layer()
@@ -152,16 +161,33 @@ class GameConsumer(AsyncWebsocketConsumer):
         try:
             while True:
                 if timer == 0:
-                    timer = 20
+                    timer = 10 # Please note that if you change this you also need to modify the script in game.html
                     last_answer = trivia.get('results')[0].get('correct_answer')
+                    update_scores(last_answer)
                     trivia = trivia_api()
                 else:
                     timer -= 1
 
-                await self.channel_layer.group_send(self.room_group_name, { "type": "send_data", "trivia": trivia, "timer": timer, "last_answer": last_answer})
+                await self.channel_layer.group_send(self.room_group_name, { "type": "send_data", "trivia": trivia, "timer": timer, "last_answer": last_answer, "player_list": get_player_list()})
                 await asyncio.sleep(1)  # Send data every second
         except asyncio.CancelledError:
             pass
+
+def update_scores(answer):
+    players = game_user_collection.find({})
+    for player in players:
+        rounds = int(player.get('rounds')) + 1 # Checks how many rounds a user has been in. If too many then DC them.
+        game_user_collection.update_one({'username': player.get('username')}, { "$set": { "rounds": str(rounds) } })
+        if rounds > 20000: # Note, this only removes them from the DB. To stop the game someone needs to log in and out.
+            game_user_collection.delete_many({'username':player.get('username')})
+
+        else:
+            if player.get('answer') == answer:
+                    new_score = int(player.get('score')) + 1
+                    game_user_collection.update_one({'username': player.get('username')}, { "$set": { "answer": "NO ANSWER" } })
+                    game_user_collection.update_one({'username': player.get('username')}, { "$set": { "score": str(new_score) } })
+                    game_user_collection.update_one({'username': player.get('username')}, { "$set": { "score": str(new_score) } })
+
 
 def trivia_api():
     url = "https://opentdb.com/api.php?amount=1&type=multiple"
