@@ -1,8 +1,11 @@
 import json
 import bcrypt
-from django.http import JsonResponse
+import requests
+import html
+import asyncio
 
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.layers import get_channel_layer
 
 from pymongo import MongoClient
 mongo_client = MongoClient("mongo")
@@ -12,6 +15,7 @@ game_collection = db["games"]
 game_user_collection = db["game_users"]
 global_salt = b'$2b$12$ldSsU24BK6EPANRbUpvXRu'
 
+intervals = {}
 
 class Consumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -67,7 +71,7 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         # self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
         # self.room_group_name = f"chat_{self.room_name}"
-        self.room_group_name = f"chat_room"
+        self.room_group_name = f"game_room"
 
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
@@ -80,10 +84,22 @@ class GameConsumer(AsyncWebsocketConsumer):
             username = "Guest"
         if game_user_collection.count_documents({'username':user['username']}) < 1:
             game_user_collection.insert_one({'username': username})# insert player
-        await self.send(json.dumps(get_player_list()))# Send a response with new player list
+        # await self.send(json.dumps(get_player_list()))# Send a response with new player list
+        
+        game_user_collection.update_one({'username': username}, { "$set": { "score": "0" } })
+
+        await self.send(json.dumps({"player_list": get_player_list()}))
+        # await self.send({"player_list": json.dumps(get_player_list())})
         await self.channel_layer.group_send(
-            self.room_group_name, {"type": "chat.message", "data": get_player_list()}
+            self.room_group_name, {"type": "chat.message", "player_list": get_player_list()}
         )
+
+        self.page = self.scope["url_route"]["kwargs"].get("page", "default_page")
+        await self.channel_layer.group_add(self.page, self.channel_name)
+        if self.page not in intervals:
+            # intervals[self.page] = asyncio.create_task(self.send_data_timer(self.page))
+            intervals[self.page] = asyncio.create_task(self.send_data_timer())
+
 
     async def disconnect(self, close_code):
         user = get_user_from_auth(cookie_parse(dict(self.scope["headers"])))
@@ -92,43 +108,96 @@ class GameConsumer(AsyncWebsocketConsumer):
         else:
             username = "Guest"
         if game_user_collection.count_documents({'username':user['username']}) > 0:
-            game_user_collection.delete_one({'username':user['username']})
+            game_user_collection.delete_many({'username':user['username']})
         await self.channel_layer.group_send(
-            self.room_group_name, {"type": "chat.message", "data": get_player_list()}
+            self.room_group_name, {"type": "chat.message", "player_list": get_player_list()}
         )
+
+        # if not await self.channel_layer.group_channels(self.page):
+        if game_user_collection.count_documents({}) < 1:
+            # Cancel the interval task and remove it from the dictionary
+            interval = intervals.pop(self.page, None)
+            if interval:
+                interval.cancel()
+
         # Leave room group
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     # Receive message from WebSocket
     async def receive(self, text_data):
-        # text_data_json = json.loads(text_data)
-
-        # user = get_user_from_auth(cookie_parse(dict(self.scope["headers"])))
-        # if user:
-        #     username = user.get('username')
-        # else:
-        #     username = "Guest"
-
         # Send message to room group
         await self.channel_layer.group_send(
-            self.room_group_name, {"type": "chat.message", "data": get_player_list()}
+            self.room_group_name, {"type": "chat.message", "player_list": get_player_list()}
         )
 
     # Receive message from room group
     async def chat_message(self, event):
-        # Send message to WebSocket
-        await self.send(json.dumps(get_player_list()))
+        player_list = event["player_list"]
+       
+        await self.send(json.dumps({"player_list": player_list}))
+    
+    async def send_data(self, event):
+        trivia = event["trivia"]
+        timer = event["timer"]
+        last_answer = event["last_answer"]
+        await self.send(json.dumps({"trivia": trivia, "timer": timer, "last_answer": last_answer}))
+
+    async def send_data_timer(self):
+        # channel_layer = get_channel_layer()
+        timer = 0
+        trivia = {'response_code': 0, 'results': [{'type': 'multiple', 'difficulty': 'medium', 'category': 'General Knowledge', 'question': 'The term &quot;scientist&quot; was coined in which year?', 'correct_answer': 'No last answer, game was paused due to lack of players', 'incorrect_answers': ['1933', '1942', '1796']}]}
+        # above is an example question directly from the api. This will be used by default if something is broken.
+        # trivia = trivia_api()
+        last_answer = "No last answer, app just resumed."
+        try:
+            while True:
+                if timer == 0:
+                    timer = 20
+                    last_answer = trivia.get('results')[0].get('correct_answer')
+                    trivia = trivia_api()
+                else:
+                    timer -= 1
+
+                await self.channel_layer.group_send(self.room_group_name, { "type": "send_data", "trivia": trivia, "timer": timer, "last_answer": last_answer})
+                await asyncio.sleep(1)  # Send data every second
+        except asyncio.CancelledError:
+            pass
+
+def trivia_api():
+    url = "https://opentdb.com/api.php?amount=1&type=multiple"
+    trivia = {'response_code': 0, 'results': [{'type': 'multiple', 'difficulty': 'medium', 'category': 'General Knowledge', 'question': 'The term &quot;scientist&quot; was coined in which year?', 'correct_answer': '1833', 'incorrect_answers': ['1933', '1942', '1796']}]}
+    # above is an example question directly from the api. This will be used by default if something is broken.        
+    try:
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            trivia = response.json()
+            return trivia
+        else:
+            print('Error:', response.status_code)
+            return trivia
+    except requests.exceptions.RequestException as e:
+        print('Error:', e)
+        return trivia
+    # The following are examples of how to use it. Note that incorrect_answers returns a list of strings while the others return strings
+    #   trivia = get_trivia()
+    #   print(trivia)
+    #   print(type(trivia))
+    #   print(html.unescape(trivia.get('results')[0].get('question')))
+    #   print(html.unescape(trivia.get('results')[0].get('correct_answer')))
+    #   print(html.unescape(trivia.get('results')[0].get('incorrect_answers')))
 
 
 def get_player_list():
     players = game_user_collection.find({})
     player_list = []
     for player in players:
+        score = player.get('score', "99")
         player = user_collection.find_one({'username': player['username']})
         if player:
-            player_list.append({'avatar':player.get('avatar') if player.get('avatar') else 'avatar/default.png', 'username': player['username']})
+            player_list.append({'avatar':player.get('avatar') if player.get('avatar') else 'avatar/default.png', 'username': player['username'], 'score': score})
         else:
-            player_list.append({'avatar':'avatar/default.png', 'username': 'Guest'})
+            player_list.append({'avatar':'avatar/default.png', 'username': 'Guest', 'score': '0'})
 
     # response = JsonResponse(player_list, safe=False)
     # return response

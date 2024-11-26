@@ -54,22 +54,24 @@
     <div id="content" class="center-container">
         <div class="question-answer">
             <div class="question">
-                <label>What days of the week does cse 312 meet?</label>
+                <label id="question-text">Question still loading</label>
             </div>
             <div class="answer">
-                <div>
+                <div id="answer1">
                     Option1
                 </div>
-                <div>
+                <div id="answer2">
                     Option2
                 </div>
-                <div>
+                <div id="answer3">
                     Option3
                 </div>
-                <div>
+                <div id="answer4">
                     Option4
                 </div>
             </div>
+            <h2 id="timer">X seconds left</h2>
+            <p id="last-correct-answer">Last answer was:</p>
         </div>
     </div>
     <div class="right-container">
@@ -97,35 +99,46 @@
                 + '/ws/game/'
             );
             
-            // document.querySelector('form').addEventListener('submit', function(event) {
-            // event.preventDefault();
-    
-            // const formData = new FormData(this);
-            // const data = {};
-    
-            // formData.forEach((value, key) => {
-            //     data[key] = value;
-            // });
-    
-            // console.log(JSON.stringify(data))
-            // chatSocket.send(JSON.stringify(data));
-            // document.querySelector('#chatInput').value = "";
-            // });
     
             chatSocket.onmessage = function(e) {
-                // const data = JSON.parse(e.data);
-                // console.log(`data: ${e.data}`)
-                // // document.querySelector('#chat-log').value += (data.message + '\n');
-                // document.querySelector('#chat-log').innerHTML += (
-                //     `<div class="post">
-                //     </div>`
-                // );
+                const data = JSON.parse(e.data);
 
-                let players = document.getElementById("players");
-                players.innerHTML = "";
-                JSON.parse(e.data).forEach(function(item){
-                    players.innerHTML += "<p><img src='/static/"+item['avatar']+"' class='avatar-small'>"+item['username']+"</p>"; 
-                });
+                if ("trivia" in data) {
+                    if(data["timer"] === 20 || document.getElementById("question-text").textContent === "Question still loading") {
+                    let question = document.getElementById("question-text");
+                    let answer1 = document.getElementById("answer1");
+                    let answer2 = document.getElementById("answer2");
+                    let answer3 = document.getElementById("answer3");
+                    let answer4 = document.getElementById("answer4");
+                    let trivia = data["trivia"]["results"];
+                    question.innerHTML = trivia[0]["question"];
+                    let answerList = trivia[0]["incorrect_answers"];;
+                    answerList.push(trivia[0]["correct_answer"])
+                    for (let i = answerList.length - 1; i > 0; i--) { //Fisher_Yates shuffle algo
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [answerList[i], answerList[j]] = [answerList[j], answerList[i]];
+                    }
+                    answer1.innerHTML = answerList[0];
+                    answer2.innerHTML = answerList[1];
+                    answer3.innerHTML = answerList[2];
+                    answer4.innerHTML = answerList[3]; 
+
+                    let lastAnswer = document.getElementById("last-correct-answer");
+                    lastAnswer.innerHTML = `Last answer was: ${data["last_answer"]}`
+                    }
+
+                    let timer = document.getElementById("timer");
+                    timer.innerHTML = data["timer"]
+                }
+                console.log(data)
+                if ("player_list" in data) {
+                    let players = document.getElementById("players");
+                    players.innerHTML = "";
+                    data["player_list"].forEach(function(item){
+                        console.log(item);
+                        players.innerHTML += "<p><img src='/static/"+item['avatar']+"' class='avatar-small'>"+item['username']+" | Score: "+item['score']+"</p>"; 
+                    });
+                }
             };
     
             chatSocket.onclose = function(e) {
