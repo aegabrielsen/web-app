@@ -4,6 +4,7 @@ Please note for project part 3 obj 1 a sense of time, there is one feature "Timi
 
 
 Project Part 3 Objective 3:
+
 The unique feature for this app is to take advantage of API calls to populate the game’s questions and answers. Calls are made to https://opentdb.com/api.php?amount=1&type=multiple. No other objective required the use of calls for an outside api over the web. 
 Testing Procedure
 1.	Navigate to consumers.py and scroll down to the trivia_api() function and confirm that it makes an api call.
