@@ -69,10 +69,7 @@ class Consumer(AsyncWebsocketConsumer):
 
 class GameConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        # self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
-        # self.room_group_name = f"chat_{self.room_name}"
         self.room_group_name = f"game_room"
-
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
 
@@ -82,40 +79,22 @@ class GameConsumer(AsyncWebsocketConsumer):
             username = user.get('username')
         else:
             username = "Guest"
-        if game_user_collection.count_documents({'username':user['username']}) < 1:
-            game_user_collection.insert_one({'username': username})# insert player
-        # await self.send(json.dumps(get_player_list()))# Send a response with new player list
-        
-        game_user_collection.update_one({'username': username}, { "$set": { "score": "0" } })
-        game_user_collection.update_one({'username': username}, { "$set": { "answer": "NO ANSWER" } })
-        game_user_collection.update_one({'username': username}, { "$set": { "rounds": "0" } })
 
-        await self.send(json.dumps({"player_list": get_player_list()}))
-        # await self.send({"player_list": json.dumps(get_player_list())})
-        await self.channel_layer.group_send(
-            self.room_group_name, {"type": "chat.message", "player_list": get_player_list()}
-        )
+        game_user_collection.update_one({'username': username}, { "$set": { "score": "0", "answer": "NO ANSWER" }}, upsert=True)
 
         self.page = self.scope["url_route"]["kwargs"].get("page", "default_page")
-        await self.channel_layer.group_add(self.page, self.channel_name)
         if self.page not in intervals:
-            # intervals[self.page] = asyncio.create_task(self.send_data_timer(self.page))
             intervals[self.page] = asyncio.create_task(self.send_data_timer())
 
 
     async def disconnect(self, close_code):
         user = get_user_from_auth(cookie_parse(dict(self.scope["headers"])))
-        if user:
-            username = user.get('username')
-        else:
-            username = "Guest"
+
         if game_user_collection.count_documents({'username':user['username']}) > 0:
             game_user_collection.delete_many({'username':user['username']})
         await self.channel_layer.group_send(
             self.room_group_name, {"type": "chat.message", "player_list": get_player_list()}
         )
-
-        # if not await self.channel_layer.group_channels(self.page):
         if game_user_collection.count_documents({}) < 1:
             # Cancel the interval task and remove it from the dictionary
             interval = intervals.pop(self.page, None)
@@ -156,7 +135,6 @@ class GameConsumer(AsyncWebsocketConsumer):
         timer = 0
         trivia = {'response_code': 0, 'results': [{'type': 'multiple', 'difficulty': 'medium', 'category': 'General Knowledge', 'question': 'The term &quot;scientist&quot; was coined in which year?', 'correct_answer': 'No last answer, game was paused due to lack of players', 'incorrect_answers': ['1933', '1942', '1796']}]}
         # above is an example question directly from the api. This will be used by default if something is broken.
-        # trivia = trivia_api()
         last_answer = "No last answer, app just resumed."
         try:
             while True:
@@ -176,17 +154,10 @@ class GameConsumer(AsyncWebsocketConsumer):
 def update_scores(answer):
     players = game_user_collection.find({})
     for player in players:
-        rounds = int(player.get('rounds')) + 1 # Checks how many rounds a user has been in. If too many then DC them.
-        game_user_collection.update_one({'username': player.get('username')}, { "$set": { "rounds": str(rounds) } })
-        if rounds > 20000: # Note, this only removes them from the DB. To stop the game someone needs to log in and out.
-            game_user_collection.delete_many({'username':player.get('username')})
-
-        else:
-            if player.get('answer') == answer:
-                    new_score = int(player.get('score')) + 1
-                    game_user_collection.update_one({'username': player.get('username')}, { "$set": { "answer": "NO ANSWER" } })
-                    game_user_collection.update_one({'username': player.get('username')}, { "$set": { "score": str(new_score) } })
-                    game_user_collection.update_one({'username': player.get('username')}, { "$set": { "score": str(new_score) } })
+        if player.get('answer') == answer:
+                new_score = int(player.get('score')) + 1
+                game_user_collection.update_one({'username': player.get('username')}, { "$set": { "answer": "NO ANSWER" } })
+                game_user_collection.update_one({'username': player.get('username')}, { "$set": { "score": str(new_score) } })
 
 
 def trivia_api():
@@ -218,15 +189,13 @@ def get_player_list():
     players = game_user_collection.find({})
     player_list = []
     for player in players:
-        score = player.get('score', "99")
+        score = player.get('score', '99')
         player = user_collection.find_one({'username': player['username']})
         if player:
             player_list.append({'avatar':player.get('avatar') if player.get('avatar') else 'avatar/default.png', 'username': player['username'], 'score': score})
         else:
             player_list.append({'avatar':'avatar/default.png', 'username': 'Guest', 'score': '0'})
 
-    # response = JsonResponse(player_list, safe=False)
-    # return response
     return player_list
 
 def cookie_parse(headers):
