@@ -99,7 +99,11 @@ def custom_static_view(request, path):
     return response
 
 # This gets the login form request
+@ratelimit(key='ip', rate='50/10s')
 def login(request):
+
+    if is_blocked(request):
+        return render(request, 'xxx_game/429.html', status=429)
 
     # Get form fields
     username = request.POST.get("username", None)
@@ -132,8 +136,13 @@ def login(request):
     response = redirect("index")
     response.set_cookie("alert-info", "login failed")
     return response
+
 # This gets the registration form request
+@ratelimit(key='ip', rate='50/10s')
 def register(request):
+
+    if is_blocked(request):
+        return render(request, 'xxx_game/429.html', status=429)
 
     # Get form fields
     username = request.POST.get("username", None)
@@ -164,7 +173,12 @@ def register(request):
     return response
 
 # Logout route
+@ratelimit(key='ip', rate='50/10s')
 def logout(request):
+
+    if is_blocked(request):
+        return render(request, 'xxx_game/429.html', status=429)
+
     auth_token = request.COOKIES.get('auth_token')
     if auth_token is None: # User is not logged in to begin with
         return render(request,"xxx_game/index.html")
@@ -177,7 +191,12 @@ def logout(request):
 
 #createpost
 ## function to create post object
+@ratelimit(key='ip', rate='50/10s')
 def create_post(request):
+
+    if is_blocked(request):
+        return render(request, 'xxx_game/429.html', status=429)
+
     user = get_user_from_auth(request)
 
     content = request.POST.get('content')
@@ -205,7 +224,12 @@ def create_post(request):
     # return HttpResponse("Successful chat")
     return redirect ("/chat")
 
+@ratelimit(key='ip', rate='50/10s')
 def chat_list(request):
+
+    if is_blocked(request):
+        return render(request, 'xxx_game/429.html', status=429)
+
     user = get_user_from_auth(request)
   
     posts = list(db['posts'].find())
@@ -241,7 +265,12 @@ def like_posts_ajax(request,post_id):
     )
     return JsonResponse({'code':0,'status': 'success'})
 
+@ratelimit(key='ip', rate='50/10s')
 def chat(request):
+
+    if is_blocked(request):
+        return render(request, 'xxx_game/429.html', status=429)
+
     user = get_user_from_auth(request)
     if user:
         username = user.get('username')
@@ -262,7 +291,12 @@ def chat(request):
 def escape_HTML(message):
     return message.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
+@ratelimit(key='ip', rate='50/10s')
 def like_posts(request,post_id):
+
+    if is_blocked(request):
+        return render(request, 'xxx_game/429.html', status=429)
+
     user = get_user_from_auth(request)
     if user is None: 
         return redirect('/chat')
@@ -396,7 +430,12 @@ def game_room(request,id):
 
 # path /join_game/
 # to start game
+@ratelimit(key='ip', rate='50/10s')
 def game(request):
+
+    if is_blocked(request):
+        return render(request, 'xxx_game/429.html', status=429)
+
     user = get_user_from_auth(request)
     context = { 
         "username":user.get('username') if user else "Guest",
@@ -421,7 +460,12 @@ def game(request):
     return render(request, 'xxx_game/game.html',context)
 
 # path /upload-avatar
+@ratelimit(key='ip', rate='50/10s')
 def upload_avatar(request):
+
+    if is_blocked(request):
+        return render(request, 'xxx_game/429.html', status=429)
+
     
     user = get_user_from_auth(request)
     
@@ -515,7 +559,12 @@ def get_game(request):
     return response
 
 # path /get_players/
+@ratelimit(key='ip', rate='50/10s')
 def get_game_player(request):
+
+    if is_blocked(request):
+        return render(request, 'xxx_game/429.html', status=429)
+
     user = get_user_from_auth(request)
     # game = game_collection.find_one({'_id': ObjectId(id)})
     # if game is None:
@@ -580,7 +629,12 @@ def game_chat_list(request,id):
 # code 100: not logged in
 # code 101: not in the game
 # code 102: game already started
+@ratelimit(key='ip', rate='50/10s')
 def leave_game(request):
+
+    if is_blocked(request):
+        return render(request, 'xxx_game/429.html', status=429)
+
     user = get_user_from_auth(request)
 
     # if not user:
