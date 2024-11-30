@@ -6,3 +6,6 @@ filetype
 channels[daphne]
 redis
 channels-redis
+django-redis-cache
+django-ratelimit
+django-blacklist

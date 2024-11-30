@@ -17,6 +17,10 @@ from bson.objectid import ObjectId
 from django.shortcuts import redirect
 import json
 
+from datetime import timedelta
+from django_ratelimit.decorators import ratelimit
+from blacklist.ratelimit import blacklist_ratelimited
+
 # databases
 db = mongo_client["webapp"]
 user_collection = db["users"]
@@ -48,7 +52,12 @@ def get_user_from_auth(request):
 
     return user
 
-# Create your views here.
+# Create your views here. ####
+
+# The @ things are for IP rate limiting
+
+@ratelimit(key='ip', rate='50/10s', block=False)
+@blacklist_ratelimited(timedelta(seconds=30))
 def index(request):
     user = get_user_from_auth(request)
     posts = list(db['posts'].find())
