@@ -17,7 +17,7 @@ SECRET_KEY = 'django-insecure-z1idrosi=4j(^n6f^t5hx8_)!#w37(a=p%lz64=y(t@)%+e$o^
 DEBUG = True
 
 # ALLOWED_HOSTS = ['142.93.119.234']
-ALLOWED_HOSTS = [] ####
+ALLOWED_HOSTS = []
 
 # Application definition
 INSTALLED_APPS = [
@@ -28,7 +28,6 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'blacklist'
     # 'django.contrib.staticfiles',
 ]
 
@@ -38,10 +37,10 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'blacklist.middleware.BlacklistMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'project1.middleware.X_Content_Type_Nosniff_Middleware',
+    'django_ratelimit.middleware.RatelimitMiddleware'
 ]
 
 ROOT_URLCONF = 'project1.urls'
@@ -103,11 +102,11 @@ CHANNEL_LAYERS = {
     },
 }
 
-CACHES = {
-    'default': {
-        'BACKEND': 'redis_cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379', #### localhost, not actual IP
-    },
-}
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'redis_cache.RedisCache',
+#         'LOCATION': 'redis://127.0.0.1:6379/1', #### localhost, not actual IP
+#     },
+# }
 
-BLACKLIST_TEMPLATE = "429.html"
+RATELIMIT_VIEW = "xxx_game.views.ratelimited"

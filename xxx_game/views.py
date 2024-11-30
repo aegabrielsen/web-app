@@ -12,16 +12,17 @@ import filetype
 import random
 import string
 import logging
-mongo_client = MongoClient("mongo")
 from bson.objectid import ObjectId
 from django.shortcuts import redirect
 import json
+import time
+import threading
 
 from datetime import timedelta
 from django_ratelimit.decorators import ratelimit
-from blacklist.ratelimit import blacklist_ratelimited
 
 # databases
+mongo_client = MongoClient("mongo")
 db = mongo_client["webapp"]
 user_collection = db["users"]
 game_collection = db["games"]
@@ -31,8 +32,9 @@ game_user_collection = db["game_users"]
 
 # guest_collection = db["guests"]
 
-
 global_salt = b'$2b$12$ldSsU24BK6EPANRbUpvXRu'
+
+blocked = set()
 
 def get_user_from_auth(request):
     # Pass request into this function and it will attempt to retrieve a user from the auth_token cookie.
@@ -54,11 +56,26 @@ def get_user_from_auth(request):
 
 # Create your views here. ####
 
-# The @ things are for IP rate limiting
+def block(ip):
+    blocked.add(ip)
+    time.sleep(30)
+    blocked.remove(ip)
 
-@ratelimit(key='ip', rate='50/10s', block=False)
-@blacklist_ratelimited(timedelta(seconds=30))
+def ratelimited(request, error):
+    ip = request.META['REMOTE_ADDR'] #### TODO maybe change this?
+    threading.Thread(target=block, args=(ip,)).start()
+    return render(request, 'xxx_game/429.html', status=429)
+
+def is_blocked(request):
+    if request.META['REMOTE_ADDR'] in blocked: #### TODO maybe change this?
+        return True
+
+@ratelimit(key='ip', rate='50/10s')
 def index(request):
+
+    if is_blocked(request):
+        return render(request, 'xxx_game/429.html', status=429)
+
     user = get_user_from_auth(request)
     posts = list(db['posts'].find())
 
