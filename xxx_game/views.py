@@ -70,7 +70,7 @@ def is_blocked(request):
     if request.META['REMOTE_ADDR'] in blocked: #### TODO maybe change this?
         return True
 
-@ratelimit(key='ip', rate='50/10s')
+@ratelimit(group='all', key='ip', rate='50/10s')
 def index(request):
 
     if is_blocked(request):
@@ -90,7 +90,12 @@ def index(request):
     return response
 
 # The middleware is skipped when using django.contrib.staticfiles, so here we do not use django.contrib.staticfiles, but customize the static file processing to set X-Content-Type-Options: nosniff.
+@ratelimit(group='all', key='ip', rate='50/10s')
 def custom_static_view(request, path):
+
+    if is_blocked(request):
+        return render(request, 'xxx_game/429.html', status=429)
+
     file_path = os.path.join(settings.BASE_DIR,'xxx_game/static', path)
     response = FileResponse(open(file_path, 'rb'))
     response['Cache-Control'] = 'public, max-age=3600'
@@ -99,7 +104,7 @@ def custom_static_view(request, path):
     return response
 
 # This gets the login form request
-@ratelimit(key='ip', rate='50/10s')
+@ratelimit(group='all', key='ip', rate='50/10s')
 def login(request):
 
     if is_blocked(request):
@@ -138,7 +143,7 @@ def login(request):
     return response
 
 # This gets the registration form request
-@ratelimit(key='ip', rate='50/10s')
+@ratelimit(group='all', key='ip', rate='50/10s')
 def register(request):
 
     if is_blocked(request):
@@ -173,7 +178,7 @@ def register(request):
     return response
 
 # Logout route
-@ratelimit(key='ip', rate='50/10s')
+@ratelimit(group='all', key='ip', rate='50/10s')
 def logout(request):
 
     if is_blocked(request):
@@ -191,7 +196,7 @@ def logout(request):
 
 #createpost
 ## function to create post object
-@ratelimit(key='ip', rate='50/10s')
+@ratelimit(group='all', key='ip', rate='50/10s')
 def create_post(request):
 
     if is_blocked(request):
@@ -224,7 +229,7 @@ def create_post(request):
     # return HttpResponse("Successful chat")
     return redirect ("/chat")
 
-@ratelimit(key='ip', rate='50/10s')
+@ratelimit(group='all', key='ip', rate='50/10s')
 def chat_list(request):
 
     if is_blocked(request):
@@ -265,7 +270,7 @@ def like_posts_ajax(request,post_id):
     )
     return JsonResponse({'code':0,'status': 'success'})
 
-@ratelimit(key='ip', rate='50/10s')
+@ratelimit(group='all', key='ip', rate='50/10s')
 def chat(request):
 
     if is_blocked(request):
@@ -291,7 +296,7 @@ def chat(request):
 def escape_HTML(message):
     return message.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
-@ratelimit(key='ip', rate='50/10s')
+@ratelimit(group='all', key='ip', rate='50/10s')
 def like_posts(request,post_id):
 
     if is_blocked(request):
@@ -430,7 +435,7 @@ def game_room(request,id):
 
 # path /join_game/
 # to start game
-@ratelimit(key='ip', rate='50/10s')
+@ratelimit(group='all', key='ip', rate='50/10s')
 def game(request):
 
     if is_blocked(request):
@@ -460,7 +465,7 @@ def game(request):
     return render(request, 'xxx_game/game.html',context)
 
 # path /upload-avatar
-@ratelimit(key='ip', rate='50/10s')
+@ratelimit(group='all', key='ip', rate='50/10s')
 def upload_avatar(request):
 
     if is_blocked(request):
@@ -559,7 +564,7 @@ def get_game(request):
     return response
 
 # path /get_players/
-@ratelimit(key='ip', rate='50/10s')
+@ratelimit(group='all', key='ip', rate='50/10s')
 def get_game_player(request):
 
     if is_blocked(request):
@@ -629,7 +634,7 @@ def game_chat_list(request,id):
 # code 100: not logged in
 # code 101: not in the game
 # code 102: game already started
-@ratelimit(key='ip', rate='50/10s')
+@ratelimit(group='all', key='ip', rate='50/10s')
 def leave_game(request):
 
     if is_blocked(request):
