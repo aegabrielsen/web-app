@@ -8,7 +8,7 @@ services:
   redis:
     image: redis:latest
     container_name: redis_container  # Optional: Name the Redis container
-    #ports:
+    # ports:
     #  - "6379:6379"  # Map the default Redis port
     volumes:
       - redis_data:/data  # Persist Redis data

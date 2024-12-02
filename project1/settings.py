@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django_ratelimit'
     # 'django.contrib.staticfiles',
 ]
 
@@ -102,11 +103,12 @@ CHANNEL_LAYERS = {
     },
 }
 
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'redis_cache.RedisCache',
-#         'LOCATION': 'redis://127.0.0.1:6379/1', #### localhost, not actual IP
-#     },
-# }
+CACHES = {
+    'default': {
+        'BACKEND': 'redis_cache.RedisCache',
+        # 'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': 'redis://redis:6379/1',
+    },
+}
 
 RATELIMIT_VIEW = "xxx_game.views.ratelimited"
