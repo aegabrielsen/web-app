@@ -175,7 +175,13 @@ def register(request):
     username = request.POST.get("username", None)
     password = request.POST.get("password", None)
     retype_password = request.POST.get("retype_password", None)
-    
+
+    # If the username >= 20 characters, do nothing
+    if len(username) >= 20:
+        response = redirect("index")
+        response.set_cookie("alert-info", "Username must be fewer than 20 characters")
+        return response
+        
     # If the passwords do not match, do nothing
     if password != retype_password:
         response = redirect("index")

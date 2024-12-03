@@ -89,7 +89,7 @@
         <form action="/register" method="post" id="register-container" class="login-register-container">
             {% csrf_token %}
             <div>
-                Username <input type="text" name="username" placeholder="Username" required>
+                Username <input type="text" name="username" placeholder="Username (< 20 characters)" required>
             </div>
             <div>
                 Password <input type="password" name="password" placeholder="Password" required>
