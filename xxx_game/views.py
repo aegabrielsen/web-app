@@ -464,6 +464,10 @@ def game(request):
         return render(request, 'xxx_game/429.html', status=429)
 
     user = get_user_from_auth(request)
+
+    if user is None:
+        return redirect("/")
+
     context = { 
         "username":user.get('username') if user else "Guest",
         "logged_in": user is not None, # used to determine if the user is logged in or not
