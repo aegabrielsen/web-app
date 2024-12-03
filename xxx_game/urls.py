@@ -1,11 +1,13 @@
 from django.urls import path, re_path
-from .views import custom_static_view
 
 from . import views
 
 urlpatterns = [
     path("", views.index, name = "index"),
-    path('static/<path:path>', custom_static_view),
+    path('static/avatar/<path:path>', views.avatar),
+    path('static/css/<path:path>', views.custom_static_view, {"type": "css"}),
+    path('static/images/<path:path>', views.custom_static_view, {"type": "images"}),
+    path('static/js/<path:path>', views.custom_static_view, {"type": "js"}),
     path("login", views.login, name = "login"),
     path("register", views.register, name = "register"),
     path("logout", views.logout, name = "logout"),
