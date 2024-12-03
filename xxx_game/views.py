@@ -95,13 +95,31 @@ def custom_static_view(request, path):
 
     if is_blocked(request):
         return render(request, 'xxx_game/429.html', status=429)
+    
+    file_path = os.path.join(settings.BASE_DIR,'xxx_game/static/') + path
+    
+    try:
+        path_parts = path.split('/')
+        if len(path_parts) == 2 and path_parts[0] in {"avatar", "css", "images", "js"}:
 
-    file_path = os.path.join(settings.BASE_DIR,'xxx_game/static', path)
-    response = FileResponse(open(file_path, 'rb'))
-    response['Cache-Control'] = 'public, max-age=3600'
-    response['X-Content-Type-Options'] = 'nosniff'
+            response = FileResponse(open(file_path, 'rb'))
+            response['Cache-Control'] = 'public, max-age=3600'
+            response['X-Content-Type-Options'] = 'nosniff'
+            
+            return response
+        else:
+            return render(request, 'xxx_game/404.html', status=404, context={'path' : file_path})
+
+    except:
+        return render(request, 'xxx_game/404.html', status=404, context = {'path' : file_path})
+
+    # file_path = os.path.join(settings.BASE_DIR,'xxx_game/static', path)
+    # response = FileResponse(open(file_path, 'rb'))
+    # response['Cache-Control'] = 'public, max-age=3600'
+    # response['X-Content-Type-Options'] = 'nosniff'
    
-    return response
+    # return response
+        
 
 # This gets the login form request
 @ratelimit(group='all', key='ip', rate='50/10s')
