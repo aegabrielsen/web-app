@@ -59,8 +59,8 @@ class Consumer(AsyncWebsocketConsumer):
     # Receive message from room group
     async def chat_message(self, event):
         content = html.escape(event["content"])
-        feeling = event["feeling"]
-        username = event["username"]
+        feeling = html.escape(event["feeling"])
+        username = html.escape(event["username"])
         post_id = event["id"]
 
         # Send message to WebSocket
