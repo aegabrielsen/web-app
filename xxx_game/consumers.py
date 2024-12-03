@@ -192,7 +192,7 @@ def get_player_list():
         score = player.get('score', '99')
         player = user_collection.find_one({'username': player['username']})
         if player:
-            player_list.append({'avatar':player.get('avatar') if player.get('avatar') else 'avatar/default.png', 'username': player['username'], 'score': score})
+            player_list.append({'avatar':player.get('avatar') if player.get('avatar') else 'avatar/default.png', 'username': html.escape(player['username']), 'score': score})
         else:
             player_list.append({'avatar':'avatar/default.png', 'username': 'Guest', 'score': '0'})
 
