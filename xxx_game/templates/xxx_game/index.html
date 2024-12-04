@@ -43,15 +43,15 @@
     </div>
 
     <div class="left-container">
-        <img src="{% static 'images/logo.png' %}" class="logo">
+        <img src="{% static 'images/logo.png' %}" class="logo" style="border-radius: 50%;">
         <div class="chat-button">
             <p>PLAY NOW</p>
-            <img src="{% static 'images/start.png' %}">
+            <img src="{% static 'images/start.png' %}" style="border-radius: 50%;">
         </div>
 
         <div class="chat-button" id="go-chat">
             <p>CHAT</p>
-            <img style="width:100px;height:100px;" src="{% static 'images/chat.png' %}">
+            <img style="width:100px;height:100px;" src="{% static 'images/chat.png' %}" style="border-radius: 50%;">
         </div>
 
         <!-- Logout form -->
@@ -67,7 +67,7 @@
     </div>
     <div id="content" class="right-container">
         <img src="{% static avatar_url %}" class="avatar">
-        <label id="change-icon"> change icon</label>
+        <label id="change-icon" style="color:black; font-size: 12px;"> change icon</label>
 
         <h1 id="username-h1">Welcome, {{username}}</h1>
 

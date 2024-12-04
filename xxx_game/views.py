@@ -154,7 +154,7 @@ def login(request):
         user_collection.update_one({"username" : username}, {"$set" : {"auth_token_hash" : auth_token_hash}})
 
         response = redirect("/", {"username" : username})
-        response.set_cookie("auth_token", auth_token, max_age=60*60*24, httponly=True)
+        response.set_cookie("auth_token", auth_token, max_age=60*60*24, httponly=True, secure=True)
         response.set_cookie("alert-info", "login success")
         if request.COOKIES.get('guest'):
             response.delete_cookie('guest')
