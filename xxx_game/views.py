@@ -537,7 +537,7 @@ def upload_avatar(request):
                 # save the file, avatar name : avatar_<username>_<random_end>.<file_extension>
 
                 rand_end = ''.join(random.choice(string.ascii_letters) for _ in range(10))
-                file_name = 'avatar_'+user['username'] +'_'+ rand_end + '.' + file_type.extension
+                file_name = 'avatar_' + '_' + rand_end + '.' + file_type.extension
                 file_path = os.path.join('xxx_game/static/avatar', file_name)
                 with open(file_path, 'wb') as f:
                     f.write(file_data)
